@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "TeSystemBackend.Core/1.0.0": {
+        "runtime": {
+          "TeSystemBackend.Core.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "TeSystemBackend.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
