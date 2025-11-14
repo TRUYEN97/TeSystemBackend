@@ -9,7 +9,7 @@
         public string EmployeeCode { get; set; } = string.Empty;
         public string Rank { get; set; } = string.Empty;
 
-        public List<UserMixGroupUser> Groups { get; set; } = new();
-        public List<UserModelRole> UserRoles { get; set; } = new();
+        public List<UserMixGroupUser> Groups { get; set; } = [];
+        public List<UserModelRole> UserRoles { get; set; } = [];
     }
 }

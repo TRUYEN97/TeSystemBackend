@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using TeSystemBackend.Data;
+using TeSystemBackend.Service;
 
 namespace TeSystemBackend.API
 {
@@ -20,7 +21,7 @@ namespace TeSystemBackend.API
                 options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
                 ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")))
 );
-
+            //builder.Services.AddScoped<UserService>();
 
             var app = builder.Build();
 

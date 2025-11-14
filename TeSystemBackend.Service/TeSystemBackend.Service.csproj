@@ -17,8 +17,4 @@
     <ProjectReference Include="..\TeSystemBackend.Data\TeSystemBackend.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-
 </Project>

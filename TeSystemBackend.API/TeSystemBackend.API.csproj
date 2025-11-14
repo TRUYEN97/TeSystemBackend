@@ -17,10 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\TeSystemBackend.Core\TeSystemBackend.Core.csproj" />
     <ProjectReference Include="..\TeSystemBackend.Service\TeSystemBackend.Service.csproj" />
   </ItemGroup>
