@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TeSystemBackend.Core.Entities
+﻿namespace TeSystemBackend.Core.Entities
 {
     public class UserModelRole
     {
@@ -17,7 +11,7 @@ namespace TeSystemBackend.Core.Entities
         public long RoleId { get; set; }
         public Role Role { get; set; } = null!;
 
-        public bool IsTamthoi { get; set; } = false;
+        public bool IsTemporary { get; set; } = false;
         public DateTime? ExpireAt { get; set; }
     }
 }
