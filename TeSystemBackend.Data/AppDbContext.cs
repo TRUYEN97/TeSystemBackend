@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using TeSystemBackend.Data.Entities;
+using System.Reflection.Emit;
 using TeSystemBackend.Core.Entities;
+using TeSystemBackend.Data.Entities;
 
 namespace TeSystemBackend.Data
 {
@@ -21,6 +22,8 @@ namespace TeSystemBackend.Data
         public DbSet<Permission> AppPermissions { get; set; } = null!;
         public DbSet<UserModelRole> UserModelRoles { get; set; } = null!;
         public DbSet<RoleMixPermission> RoleMixPermissions { get; set; } = null!;
+        public DbSet<AclEntry> AclEntries { get; set; } = null!;
+        public DbSet<RefreshTokenEntity> RefreshTokenEntitys { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -102,6 +105,44 @@ namespace TeSystemBackend.Data
             builder.Entity<Permission>()
                 .Property(p => p.Description)
                 .HasMaxLength(500);
+
+            builder.Entity<AclEntry>(ae =>
+            {
+                ae.HasKey(x => x.Id);
+                ae.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+                ae.HasOne(x => x.Permission).WithMany().HasForeignKey(x => x.PermissionId);
+            });
+
+            builder.Entity<AppUserEntity>(entity =>
+            {
+                entity.Property(u => u.UserName)
+                      .HasMaxLength(50)
+                      .IsRequired();
+
+                entity.Property(u => u.Email)
+                      .HasMaxLength(100)
+                      .IsRequired();
+            });
+
+            builder.Entity<RefreshTokenEntity>(entity =>
+            {
+                entity.HasKey(rt => rt.Id);
+
+                entity.Property(rt => rt.Token)
+                      .HasMaxLength(200)
+                      .IsRequired();
+
+                entity.Property(rt => rt.CreatedAt)
+                      .IsRequired();
+
+                entity.Property(rt => rt.ExpiresAt)
+                      .IsRequired();
+
+                entity.HasOne(rt => rt.User)
+                      .WithMany(u => u.RefreshTokens)
+                      .HasForeignKey(rt => rt.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }
