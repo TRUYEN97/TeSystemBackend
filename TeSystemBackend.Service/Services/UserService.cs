@@ -1,8 +1,9 @@
-﻿using TeSystemBackend.Data;
-using TeSystemBackend.Data.Entities;
-using TeSystemBackend.Core.Entities;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using TeSystemBackend.Core.Entities;
+using TeSystemBackend.Data;
+using TeSystemBackend.Data.Entities;
 
 namespace TeSystemBackend.Service
 {
@@ -10,11 +11,13 @@ namespace TeSystemBackend.Service
     {
         private readonly UserManager<AppUserEntity> _userManager;
         private readonly AppDbContext _dbContext;
+        private readonly IMapper _mapper;
 
-        public UserService(UserManager<AppUserEntity> userManager, AppDbContext dbContext)
+        public UserService(UserManager<AppUserEntity> userManager, AppDbContext dbContext, IMapper mapper)
         {
             _userManager = userManager;
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
         public async Task<AppUser> RegisterAsync(
@@ -41,15 +44,10 @@ namespace TeSystemBackend.Service
             if (!result.Succeeded)
                 throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
 
-            var newUser = new AppUser
-            {
-                Id = identityUser.Id,
-                UserName = identityUser.UserName,
-                Email = identityUser.Email,
-                FullName = fullName,
-                EmployeeCode = employeeCode,
-                Rank = ""
-            };
+            var newUser = _mapper.Map<AppUser>(identityUser);
+            newUser.FullName = fullName;
+            newUser.EmployeeCode = employeeCode;
+            newUser.Rank = "";
 
             _dbContext.AppUsers.Add(newUser);
             await _dbContext.SaveChangesAsync();

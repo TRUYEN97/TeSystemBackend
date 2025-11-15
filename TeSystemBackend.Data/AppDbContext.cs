@@ -23,7 +23,7 @@ namespace TeSystemBackend.Data
         public DbSet<UserModelRole> UserModelRoles { get; set; } = null!;
         public DbSet<RoleMixPermission> RoleMixPermissions { get; set; } = null!;
         public DbSet<AclEntry> AclEntries { get; set; } = null!;
-        public DbSet<RefreshTokenEntity> RefreshTokenEntitys { get; set; } = null!;
+        public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -113,36 +113,25 @@ namespace TeSystemBackend.Data
                 ae.HasOne(x => x.Permission).WithMany().HasForeignKey(x => x.PermissionId);
             });
 
-            builder.Entity<AppUserEntity>(entity =>
-            {
-                entity.Property(u => u.UserName)
-                      .HasMaxLength(50)
-                      .IsRequired();
-
-                entity.Property(u => u.Email)
-                      .HasMaxLength(100)
-                      .IsRequired();
-            });
-
             builder.Entity<RefreshTokenEntity>(entity =>
             {
-                entity.HasKey(rt => rt.Id);
+                entity.ToTable("RefreshTokens");
 
-                entity.Property(rt => rt.Token)
-                      .HasMaxLength(200)
-                      .IsRequired();
+                entity.HasKey(e => e.Id);
 
-                entity.Property(rt => rt.CreatedAt)
-                      .IsRequired();
+                entity.Property(e => e.Token)
+                      .IsRequired()
+                      .HasMaxLength(200);
 
-                entity.Property(rt => rt.ExpiresAt)
-                      .IsRequired();
+                entity.HasIndex(e => e.Token)
+                      .IsUnique();
 
-                entity.HasOne(rt => rt.User)
-                      .WithMany(u => u.RefreshTokens)
-                      .HasForeignKey(rt => rt.UserId)
+                entity.HasOne(e => e.User)
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
+
         }
     }
 }
