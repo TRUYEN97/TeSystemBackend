@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TeSystemBackend.API.Filters;
+using TeSystemBackend.API.Middleware;
 using TeSystemBackend.Data;
 using TeSystemBackend.Data.Entities;
 using TeSystemBackend.Service;
@@ -44,12 +46,27 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdmin", policy =>
+        policy.RequireRole("Admin"));
+    
+    options.AddPolicy("Permission:Users.Manage", policy =>
+        policy.RequireClaim("Permission", "Users.Manage"));
+    
+    options.AddPolicy("Permission:Users.View", policy =>
+        policy.RequireClaim("Permission", "Users.View"));
+});
+
 builder.Services.AddAutoMapper(typeof(UserProfile));
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -62,6 +79,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

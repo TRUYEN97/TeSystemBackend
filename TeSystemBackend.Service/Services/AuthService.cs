@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using TeSystemBackend.Core.Entities;
 using TeSystemBackend.Data;
 using TeSystemBackend.Data.Entities;
 
@@ -41,13 +42,60 @@ namespace TeSystemBackend.Service
             if (!validPassword)
                 throw new Exception("Invalid password");
 
-            var accessToken = GenerateJwtToken(user);
+            var accessToken = await GenerateJwtTokenAsync(user);
             var refreshToken = await GenerateRefreshToken(user.Id, ipAddress);
 
             return (accessToken, refreshToken);
         }
 
-        private string GenerateJwtToken(AppUserEntity user)
+        private async Task<List<string>> GetUserRolesAsync(long userId)
+        {
+            var userRoles = await _dbContext.UserModelRoles
+                .Where(umr => umr.UserId == userId)
+                .Include(umr => umr.Role)
+                .Where(umr => !umr.IsTemporary || (umr.ExpireAt.HasValue && umr.ExpireAt.Value > DateTime.UtcNow))
+                .Select(umr => umr.Role.Name)
+                .Distinct()
+                .ToListAsync();
+
+            return userRoles;
+        }
+
+        private async Task<List<string>> GetUserPermissionsAsync(long userId)
+        {
+            var permissions = new HashSet<string>();
+
+            var rolePermissions = await _dbContext.UserModelRoles
+                .Where(umr => umr.UserId == userId)
+                .Where(umr => !umr.IsTemporary || (umr.ExpireAt.HasValue && umr.ExpireAt.Value > DateTime.UtcNow))
+                .Include(umr => umr.Role)
+                    .ThenInclude(r => r.RoleMixPermissions)
+                        .ThenInclude(rmp => rmp.Permission)
+                .SelectMany(umr => umr.Role.RoleMixPermissions.Select(rmp => rmp.Permission.Name))
+                .Distinct()
+                .ToListAsync();
+
+            foreach (var perm in rolePermissions)
+            {
+                permissions.Add(perm);
+            }
+
+            var aclPermissions = await _dbContext.AclEntries
+                .Where(a => a.UserId == userId && a.IsAllowed)
+                .Include(a => a.Permission)
+                .Select(a => a.Permission.Name)
+                .Distinct()
+                .ToListAsync();
+
+            foreach (var perm in aclPermissions)
+            {
+                permissions.Add(perm);
+            }
+
+            return permissions.ToList();
+        }
+
+        private async Task<string> GenerateJwtTokenAsync(AppUserEntity user)
         {
             var jwtSettings = _config.GetSection("Jwt");
 
@@ -60,8 +108,21 @@ namespace TeSystemBackend.Service
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.UserName!)
+                new Claim(ClaimTypes.Name, user.UserName!),
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty)
             };
+
+            var roles = await GetUserRolesAsync(user.Id);
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var permissions = await GetUserPermissionsAsync(user.Id);
+            foreach (var permission in permissions)
+            {
+                claims.Add(new Claim("Permission", permission));
+            }
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings.GetValue<string>("Issuer"),
@@ -109,7 +170,7 @@ namespace TeSystemBackend.Service
             if (user == null)
                 throw new Exception("Invalid refresh token");
 
-            var newAccessToken = GenerateJwtToken(user);
+            var newAccessToken = await GenerateJwtTokenAsync(user);
             var newRefreshToken = await GenerateRefreshToken(user.Id, ipAddress);
 
             return (newAccessToken, newRefreshToken);

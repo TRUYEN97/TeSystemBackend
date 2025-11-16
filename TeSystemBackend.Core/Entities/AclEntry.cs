@@ -8,7 +8,6 @@
         public long PermissionId { get; set; } 
         public bool IsAllowed { get; set; } = true;
 
-        public AppUser User { get; set; } = null!;
         public Permission Permission { get; set; } = null!;
     }
 }

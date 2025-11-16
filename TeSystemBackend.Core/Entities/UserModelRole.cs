@@ -3,7 +3,6 @@
     public class UserModelRole
     {
         public long UserId { get; set; }
-        public AppUser User { get; set; } = null!;
 
         public long ModelId { get; set; }
         public Model Model { get; set; } = null!;

@@ -1,8 +1,5 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TeSystemBackend.Core.Entities;
-using TeSystemBackend.Data;
 using TeSystemBackend.Data.Entities;
 
 namespace TeSystemBackend.Service
@@ -10,17 +7,13 @@ namespace TeSystemBackend.Service
     public class UserService
     {
         private readonly UserManager<AppUserEntity> _userManager;
-        private readonly AppDbContext _dbContext;
-        private readonly IMapper _mapper;
 
-        public UserService(UserManager<AppUserEntity> userManager, AppDbContext dbContext, IMapper mapper)
+        public UserService(UserManager<AppUserEntity> userManager)
         {
             _userManager = userManager;
-            _dbContext = dbContext;
-            _mapper = mapper;
         }
 
-        public async Task<AppUser> RegisterAsync(
+        public async Task<AppUserEntity> RegisterAsync(
             string userName,
             string email,
             string password,
@@ -37,27 +30,25 @@ namespace TeSystemBackend.Service
             {
                 UserName = userName,
                 Email = email,
-                IsActive = true
+                FullName = fullName,
+                EmployeeCode = employeeCode,
+                Rank = string.Empty,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(identityUser, password);
             if (!result.Succeeded)
                 throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
 
-            var newUser = _mapper.Map<AppUser>(identityUser);
-            newUser.FullName = fullName;
-            newUser.EmployeeCode = employeeCode;
-            newUser.Rank = "";
-
-            _dbContext.AppUsers.Add(newUser);
-            await _dbContext.SaveChangesAsync();
-
-            return newUser;
+            return identityUser;
         }
 
-        public async Task<List<AppUser>> GetAllUsersAsync()
+        public async Task<List<AppUserEntity>> GetAllUsersAsync()
         {
-            return await _dbContext.AppUsers.AsNoTracking().ToListAsync();
+            return await _userManager.Users
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

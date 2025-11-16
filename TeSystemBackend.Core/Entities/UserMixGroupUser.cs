@@ -3,7 +3,6 @@
     public class UserMixGroupUser
     {
         public long UserId { get; set; }
-        public AppUser User { get; set; } = null!;
 
         public long GroupUserId { get; set; }
         public GroupUser GroupUser { get; set; } = null!;

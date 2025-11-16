@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 using TeSystemBackend.Core.Entities;
 using TeSystemBackend.Data.Entities;
 
@@ -14,7 +13,6 @@ namespace TeSystemBackend.Data
         {
         }
 
-        public DbSet<AppUser> AppUsers { get; set; } = null!;
         public DbSet<GroupUser> GroupUsers { get; set; } = null!;
         public DbSet<UserMixGroupUser> UserMixGroupUsers { get; set; } = null!;
         public DbSet<Model> Models { get; set; } = null!;
@@ -33,9 +31,10 @@ namespace TeSystemBackend.Data
                 .HasKey(um => new { um.UserId, um.GroupUserId });
 
             builder.Entity<UserMixGroupUser>()
-                .HasOne(um => um.User)
+                .HasOne<AppUserEntity>()
                 .WithMany(u => u.Groups)
-                .HasForeignKey(um => um.UserId);
+                .HasForeignKey(um => um.UserId)
+                .HasPrincipalKey(u => u.Id);
 
             builder.Entity<UserMixGroupUser>()
                 .HasOne(um => um.GroupUser)
@@ -46,9 +45,10 @@ namespace TeSystemBackend.Data
                 .HasKey(umr => new { umr.UserId, umr.ModelId, umr.RoleId });
 
             builder.Entity<UserModelRole>()
-                .HasOne(umr => umr.User)
+                .HasOne<AppUserEntity>()
                 .WithMany(u => u.UserRoles)
-                .HasForeignKey(umr => umr.UserId);
+                .HasForeignKey(umr => umr.UserId)
+                .HasPrincipalKey(u => u.Id);
 
             builder.Entity<UserModelRole>()
                 .HasOne(umr => umr.Model)
@@ -73,14 +73,18 @@ namespace TeSystemBackend.Data
                 .WithMany(p => p.RoleMixPermissions)
                 .HasForeignKey(rp => rp.PermissionId);
 
-            builder.Entity<AppUser>()
-                .Property(u => u.FullName)
-                .HasMaxLength(200)
-                .IsRequired();
-
-            builder.Entity<AppUser>()
-                .Property(u => u.EmployeeCode)
-                .HasMaxLength(50);
+            builder.Entity<AppUserEntity>(entity =>
+            {
+                entity.Property(u => u.FullName)
+                    .HasMaxLength(200)
+                    .IsRequired();
+                
+                entity.Property(u => u.EmployeeCode)
+                    .HasMaxLength(50);
+                
+                entity.Property(u => u.Rank)
+                    .HasMaxLength(100);
+            });
 
             builder.Entity<GroupUser>()
                 .Property(g => g.Name)
@@ -109,8 +113,13 @@ namespace TeSystemBackend.Data
             builder.Entity<AclEntry>(ae =>
             {
                 ae.HasKey(x => x.Id);
-                ae.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-                ae.HasOne(x => x.Permission).WithMany().HasForeignKey(x => x.PermissionId);
+                ae.HasOne<AppUserEntity>()
+                    .WithMany()
+                    .HasForeignKey(x => x.UserId)
+                    .HasPrincipalKey(u => u.Id);
+                ae.HasOne(x => x.Permission)
+                    .WithMany()
+                    .HasForeignKey(x => x.PermissionId);
             });
 
             builder.Entity<RefreshTokenEntity>(entity =>
