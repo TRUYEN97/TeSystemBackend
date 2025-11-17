@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Net;
-using System.Text.Json;
+using TeSystemBackend.API.Responses;
+using TeSystemBackend.Service.Exceptions;
 
 namespace TeSystemBackend.API.Middleware
 {
@@ -26,34 +26,37 @@ namespace TeSystemBackend.API.Middleware
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unhandled exception occurred. Path: {Path}, Method: {Method}",
-                    context.Request.Path, context.Request.Method);
                 await HandleExceptionAsync(context, ex);
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             var response = context.Response;
             response.ContentType = "application/json";
 
-            var (statusCode, message) = exception switch
+            var path = context.Request.Path.HasValue ? context.Request.Path.Value! : "/";
+            var method = context.Request.Method;
+            var exceptionName = exception.GetType().Name;
+
+            _logger.LogError(
+                exception,
+                "Unhandled exception {ExceptionName} at {Method} {Path}: {Message}",
+                exceptionName,
+                method,
+                path,
+                exception.Message);
+
+            var (errorCode, message) = exception switch
             {
-                ArgumentException => ((int)HttpStatusCode.BadRequest, exception.Message),
-                UnauthorizedAccessException => ((int)HttpStatusCode.Unauthorized, exception.Message),
-                KeyNotFoundException => ((int)HttpStatusCode.NotFound, exception.Message),
-                _ => ((int)HttpStatusCode.InternalServerError, "An error occurred while processing your request")
+                AppException appException => (appException.ErrorCode, appException.Message),
+                _ => (500, "Lỗi hệ thống")
             };
 
-            response.StatusCode = statusCode;
+            response.StatusCode = errorCode;
+            var payload = ApiResponse.Body<object?>(errorCode, message, null);
 
-            var result = JsonSerializer.Serialize(new
-            {
-                error = message,
-                statusCode = statusCode
-            });
-
-            return response.WriteAsync(result);
+            return response.WriteAsJsonAsync(payload);
         }
     }
 }

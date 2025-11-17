@@ -1,14 +1,16 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TeSystemBackend.API.Filters;
 using TeSystemBackend.API.Middleware;
 using TeSystemBackend.Data;
+using TeSystemBackend.Data.Abstractions;
 using TeSystemBackend.Data.Entities;
 using TeSystemBackend.Service;
-using TeSystemBackend.Service.Mapping;
+using TeSystemBackend.Service.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,14 +60,18 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim("Permission", "Users.View"));
 });
 
-builder.Services.AddAutoMapper(typeof(UserProfile));
-
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAclService, AclService>();
 
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ValidationFilter>();
+});
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

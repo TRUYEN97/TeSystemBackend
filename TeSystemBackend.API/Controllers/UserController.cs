@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TeSystemBackend.Service;
 using TeSystemBackend.API.DTOs.Users;
+using TeSystemBackend.API.Responses;
+using TeSystemBackend.Service.Interfaces;
 
 namespace TeSystemBackend.API.Controllers
 {
@@ -8,9 +9,9 @@ namespace TeSystemBackend.API.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
 
-        public UsersController(UserService userService)
+        public UsersController(IUserService userService)
         {
             _userService = userService;
         }
@@ -22,20 +23,18 @@ namespace TeSystemBackend.API.Controllers
                 request.UserName,
                 request.Email,
                 request.Password,
-                request.FullName,
-                request.EmployeeCode
+                request.FullName
             );
 
             var response = new RegisterResponse
             {
                 Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                FullName = user.FullName,
-                EmployeeCode = user.EmployeeCode
+                UserName = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                FullName = user.FullName
             };
 
-            return Ok(response);
+            return ApiResponse.Success(response, "Đăng ký thành công");
         }
     }
 }

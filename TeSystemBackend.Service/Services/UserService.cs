@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TeSystemBackend.Data.Entities;
+using TeSystemBackend.Service.Exceptions;
+using TeSystemBackend.Service.Interfaces;
 
 namespace TeSystemBackend.Service
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly UserManager<AppUserEntity> _userManager;
 
@@ -17,21 +19,19 @@ namespace TeSystemBackend.Service
             string userName,
             string email,
             string password,
-            string fullName,
-            string employeeCode)
+            string fullName)
         {
             if (await _userManager.FindByNameAsync(userName) != null)
-                throw new Exception("Username đã tồn tại");
+                throw new BadRequestException("Tên đăng nhập đã tồn tại");
 
             if (await _userManager.FindByEmailAsync(email) != null)
-                throw new Exception("Email đã tồn tại");
+                throw new BadRequestException("Email đã tồn tại");
 
             var identityUser = new AppUserEntity
             {
                 UserName = userName,
                 Email = email,
                 FullName = fullName,
-                EmployeeCode = employeeCode,
                 Rank = string.Empty,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
@@ -39,7 +39,7 @@ namespace TeSystemBackend.Service
 
             var result = await _userManager.CreateAsync(identityUser, password);
             if (!result.Succeeded)
-                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+                throw new BadRequestException(string.Join(", ", result.Errors.Select(e => e.Description)));
 
             return identityUser;
         }

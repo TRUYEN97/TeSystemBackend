@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TeSystemBackend.API.DTOs.User;
-using TeSystemBackend.Service;
+using TeSystemBackend.API.Responses;
+using TeSystemBackend.Service.Interfaces;
 
 namespace TeSystemBackend.API.Controllers
 {
@@ -8,9 +9,9 @@ namespace TeSystemBackend.API.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
 
-        public AuthController(AuthService authService)
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
         }
@@ -26,11 +27,13 @@ namespace TeSystemBackend.API.Controllers
                 ip
             );
 
-            return Ok(new LoginResponse
+            var response = new LoginResponse
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken
-            });
+            };
+
+            return ApiResponse.Success(response, "Đăng nhập thành công");
         }
 
         [HttpPost("refresh")]
@@ -41,11 +44,13 @@ namespace TeSystemBackend.API.Controllers
             var (newAccessToken, newRefreshToken) =
                 await _authService.RefreshTokenAsync(request.RefreshToken!, ip);
 
-            return Ok(new LoginResponse
+            var response = new LoginResponse
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken
-            });
+            };
+
+            return ApiResponse.Success(response, "Làm mới token thành công");
         }
     }
 }

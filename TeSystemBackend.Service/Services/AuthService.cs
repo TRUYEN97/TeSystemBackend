@@ -4,27 +4,30 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using TeSystemBackend.Core.Entities;
-using TeSystemBackend.Data;
+using TeSystemBackend.Data.Abstractions;
 using TeSystemBackend.Data.Entities;
+using TeSystemBackend.Service.Exceptions;
+using TeSystemBackend.Service.Interfaces;
 
 namespace TeSystemBackend.Service
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly UserManager<AppUserEntity> _userManager;
-        private readonly AppDbContext _dbContext;
-        private readonly IConfiguration _config;
+        private readonly IAppDbContext _dbContext;
+        private readonly IConfigurationSection _jwtSettings;
 
         public AuthService(
             UserManager<AppUserEntity> userManager,
-            AppDbContext dbContext,
+            IAppDbContext dbContext,
             IConfiguration config)
         {
             _userManager = userManager;
             _dbContext = dbContext;
-            _config = config;
+            _jwtSettings = config.GetSection("Jwt");
         }
 
         public async Task<(string accessToken, string refreshToken)> LoginAsync(
@@ -36,11 +39,11 @@ namespace TeSystemBackend.Service
                 .FirstOrDefaultAsync(x => x.UserName == username);
 
             if (user == null)
-                throw new Exception("User not found");
+                throw new NotFoundException("Người dùng không tồn tại");
 
             var validPassword = await _userManager.CheckPasswordAsync(user, password);
             if (!validPassword)
-                throw new Exception("Invalid password");
+                throw new UnauthorizedException("Sai mật khẩu");
 
             var accessToken = await GenerateJwtTokenAsync(user);
             var refreshToken = await GenerateRefreshToken(user.Id, ipAddress);
@@ -97,10 +100,8 @@ namespace TeSystemBackend.Service
 
         private async Task<string> GenerateJwtTokenAsync(AppUserEntity user)
         {
-            var jwtSettings = _config.GetSection("Jwt");
-
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings.GetValue<string>("Key")!)
+                Encoding.UTF8.GetBytes(_jwtSettings.GetValue<string>("Key")!)
             );
 
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -124,11 +125,13 @@ namespace TeSystemBackend.Service
                 claims.Add(new Claim("Permission", permission));
             }
 
+            var accessTokenMinutes = _jwtSettings.GetValue<double?>("AccessTokenExpirationMinutes") ?? 60;
+
             var token = new JwtSecurityToken(
-                issuer: jwtSettings.GetValue<string>("Issuer"),
-                audience: jwtSettings.GetValue<string>("Audience"),
+                issuer: _jwtSettings.GetValue<string>("Issuer"),
+                audience: _jwtSettings.GetValue<string>("Audience"),
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(jwtSettings.GetValue<double>("AccessTokenExpirationMinutes")),
+                expires: DateTime.UtcNow.AddMinutes(accessTokenMinutes),
                 signingCredentials: credentials
             );
 
@@ -137,11 +140,16 @@ namespace TeSystemBackend.Service
 
         private async Task<string> GenerateRefreshToken(long userId, string ipAddress)
         {
+            var tokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+            var hashedToken = HashToken(tokenValue);
+            var refreshDays = _jwtSettings.GetValue<int?>("RefreshTokenExpirationDays") ?? 7;
+            var expiresAt = DateTime.UtcNow.AddDays(refreshDays);
+
             var refreshToken = new RefreshTokenEntity
             {
                 UserId = userId,
-                Token = Guid.NewGuid().ToString("N"),
-                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                Token = hashedToken,
+                ExpiresAt = expiresAt,
                 CreatedAt = DateTime.UtcNow,
                 CreatedByIp = ipAddress,
             };
@@ -149,26 +157,42 @@ namespace TeSystemBackend.Service
             _dbContext.RefreshTokens.Add(refreshToken);
             await _dbContext.SaveChangesAsync();
 
-            return refreshToken.Token;
+            return tokenValue;
         }
 
-        public async Task<AppUserEntity?> ValidateRefreshTokenAsync(string refreshToken)
+        private static string HashToken(string token)
         {
-            var token = await _dbContext.RefreshTokens
-                .FirstOrDefaultAsync(x => x.Token == refreshToken && !x.IsRevoked);
+            using var sha = SHA256.Create();
+            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(token));
+            return Convert.ToBase64String(bytes);
+        }
 
-            if (token == null || token.ExpiresAt < DateTime.UtcNow)
-                return null;
+        private async Task<RefreshTokenEntity?> GetValidRefreshTokenAsync(string refreshToken)
+        {
+            var hashed = HashToken(refreshToken);
 
-            var user = await _userManager.FindByIdAsync(token.UserId.ToString());
-            return user;
+            return await _dbContext.RefreshTokens
+                .FirstOrDefaultAsync(x =>
+                    x.Token == hashed &&
+                    !x.IsRevoked &&
+                    x.ExpiresAt > DateTime.UtcNow);
         }
 
         public async Task<(string accessToken, string refreshToken)> RefreshTokenAsync(string oldRefreshToken, string ipAddress)
         {
-            var user = await ValidateRefreshTokenAsync(oldRefreshToken);
+            var existingToken = await GetValidRefreshTokenAsync(oldRefreshToken);
+            if (existingToken == null)
+                throw new UnauthorizedException("Refresh token không hợp lệ");
+
+            existingToken.IsRevoked = true;
+            existingToken.RevokedAt = DateTime.UtcNow;
+            existingToken.RevokedByIp = ipAddress;
+
+            await _dbContext.SaveChangesAsync();
+
+            var user = await _userManager.FindByIdAsync(existingToken.UserId.ToString());
             if (user == null)
-                throw new Exception("Invalid refresh token");
+                throw new NotFoundException("Người dùng không tồn tại");
 
             var newAccessToken = await GenerateJwtTokenAsync(user);
             var newRefreshToken = await GenerateRefreshToken(user.Id, ipAddress);

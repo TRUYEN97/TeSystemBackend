@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TeSystemBackend.Core.Entities;
+using TeSystemBackend.Data.Abstractions;
 using TeSystemBackend.Data.Entities;
 
 namespace TeSystemBackend.Data
 {
-    public class AppDbContext : IdentityDbContext<AppUserEntity, IdentityRole<long>, long>
+    public class AppDbContext : IdentityDbContext<AppUserEntity, IdentityRole<long>, long>, IAppDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -21,7 +22,7 @@ namespace TeSystemBackend.Data
         public DbSet<UserModelRole> UserModelRoles { get; set; } = null!;
         public DbSet<RoleMixPermission> RoleMixPermissions { get; set; } = null!;
         public DbSet<AclEntry> AclEntries { get; set; } = null!;
-        public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
+        public DbSet<RefreshTokenEntity> RefreshTokens { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -78,10 +79,7 @@ namespace TeSystemBackend.Data
                 entity.Property(u => u.FullName)
                     .HasMaxLength(200)
                     .IsRequired();
-                
-                entity.Property(u => u.EmployeeCode)
-                    .HasMaxLength(50);
-                
+
                 entity.Property(u => u.Rank)
                     .HasMaxLength(100);
             });

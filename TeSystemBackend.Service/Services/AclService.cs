@@ -1,14 +1,15 @@
 ﻿using TeSystemBackend.Core.Entities;
-using TeSystemBackend.Data;
+using TeSystemBackend.Data.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using TeSystemBackend.Service.Interfaces;
 
 namespace TeSystemBackend.Service
 {
-    public class AclService
+    public class AclService : IAclService
     {
-        private readonly AppDbContext _dbContext;
+        private readonly IAppDbContext _dbContext;
 
-        public AclService(AppDbContext dbContext) => _dbContext = dbContext;
+        public AclService(IAppDbContext dbContext) => _dbContext = dbContext;
 
         public async Task<AclEntry> GrantPermissionAsync(long userId, long resourceId, long permissionId)
         {
