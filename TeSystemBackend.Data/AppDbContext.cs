@@ -2,18 +2,16 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TeSystemBackend.Core.Entities;
-using TeSystemBackend.Data.Abstractions;
 using TeSystemBackend.Data.Entities;
 
 namespace TeSystemBackend.Data
 {
-    public class AppDbContext : IdentityDbContext<AppUserEntity, IdentityRole<long>, long>, IAppDbContext
+    public class AppDbContext : IdentityDbContext<AppUserEntity, IdentityRole<long>, long>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
-
         public DbSet<GroupUser> GroupUsers { get; set; } = null!;
         public DbSet<UserMixGroupUser> UserMixGroupUsers { get; set; } = null!;
         public DbSet<Model> Models { get; set; } = null!;
@@ -22,7 +20,7 @@ namespace TeSystemBackend.Data
         public DbSet<UserModelRole> UserModelRoles { get; set; } = null!;
         public DbSet<RoleMixPermission> RoleMixPermissions { get; set; } = null!;
         public DbSet<AclEntry> AclEntries { get; set; } = null!;
-        public DbSet<RefreshTokenEntity> RefreshTokens { get; set; } = null!;
+        public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -103,42 +101,6 @@ namespace TeSystemBackend.Data
                 .Property(p => p.Name)
                 .HasMaxLength(100)
                 .IsRequired();
-
-            builder.Entity<Permission>()
-                .Property(p => p.Description)
-                .HasMaxLength(500);
-
-            builder.Entity<AclEntry>(ae =>
-            {
-                ae.HasKey(x => x.Id);
-                ae.HasOne<AppUserEntity>()
-                    .WithMany()
-                    .HasForeignKey(x => x.UserId)
-                    .HasPrincipalKey(u => u.Id);
-                ae.HasOne(x => x.Permission)
-                    .WithMany()
-                    .HasForeignKey(x => x.PermissionId);
-            });
-
-            builder.Entity<RefreshTokenEntity>(entity =>
-            {
-                entity.ToTable("RefreshTokens");
-
-                entity.HasKey(e => e.Id);
-
-                entity.Property(e => e.Token)
-                      .IsRequired()
-                      .HasMaxLength(200);
-
-                entity.HasIndex(e => e.Token)
-                      .IsUnique();
-
-                entity.HasOne(e => e.User)
-                      .WithMany()
-                      .HasForeignKey(e => e.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
-            });
-
         }
     }
 }

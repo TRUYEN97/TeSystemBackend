@@ -7,11 +7,11 @@ namespace TeSystemBackend.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    public class usersController : ControllerBase
     {
         private readonly IUserService _userService;
 
-        public UsersController(IUserService userService)
+        public usersController(IUserService userService)
         {
             _userService = userService;
         }

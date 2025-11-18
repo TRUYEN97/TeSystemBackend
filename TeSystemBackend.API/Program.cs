@@ -7,7 +7,6 @@ using System.Text;
 using TeSystemBackend.API.Filters;
 using TeSystemBackend.API.Middleware;
 using TeSystemBackend.Data;
-using TeSystemBackend.Data.Abstractions;
 using TeSystemBackend.Data.Entities;
 using TeSystemBackend.Service;
 using TeSystemBackend.Service.Interfaces;
@@ -48,19 +47,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("RequireAdmin", policy =>
-        policy.RequireRole("Admin"));
-    
-    options.AddPolicy("Permission:Users.Manage", policy =>
-        policy.RequireClaim("Permission", "Users.Manage"));
-    
-    options.AddPolicy("Permission:Users.View", policy =>
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("RequireAdmin", policy =>
+        policy.RequireRole("Admin"))
+    .AddPolicy("Permission:Users.Manage", policy =>
+        policy.RequireClaim("Permission", "Users.Manage"))
+    .AddPolicy("Permission:Users.View", policy =>
         policy.RequireClaim("Permission", "Users.View"));
-});
 
-builder.Services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAclService, AclService>();

@@ -23,7 +23,7 @@ namespace TeSystemBackend.Data.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false)
+                    Description = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -139,6 +139,29 @@ namespace TeSystemBackend.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "AclEntries",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    ResourceId = table.Column<long>(type: "bigint", nullable: false),
+                    PermissionId = table.Column<long>(type: "bigint", nullable: false),
+                    IsAllowed = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AclEntries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AclEntries_AppPermissions_PermissionId",
+                        column: x => x.PermissionId,
+                        principalTable: "AppPermissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "RoleMixPermissions",
                 columns: table => new
                 {
@@ -182,35 +205,6 @@ namespace TeSystemBackend.Data.Migrations
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "AclEntries",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    ResourceId = table.Column<long>(type: "bigint", nullable: false),
-                    PermissionId = table.Column<long>(type: "bigint", nullable: false),
-                    IsAllowed = table.Column<bool>(type: "tinyint(1)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AclEntries", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AclEntries_AppPermissions_PermissionId",
-                        column: x => x.PermissionId,
-                        principalTable: "AppPermissions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AclEntries_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -320,7 +314,7 @@ namespace TeSystemBackend.Data.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Token = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+                    Token = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ExpiresAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -329,17 +323,11 @@ namespace TeSystemBackend.Data.Migrations
                     IsRevoked = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     RevokedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     RevokedByIp = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    AppUserEntityId = table.Column<long>(type: "bigint", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RefreshTokens", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RefreshTokens_AspNetUsers_AppUserEntityId",
-                        column: x => x.AppUserEntityId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_RefreshTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
@@ -415,11 +403,6 @@ namespace TeSystemBackend.Data.Migrations
                 column: "PermissionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AclEntries_UserId",
-                table: "AclEntries",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
@@ -454,17 +437,6 @@ namespace TeSystemBackend.Data.Migrations
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RefreshTokens_AppUserEntityId",
-                table: "RefreshTokens",
-                column: "AppUserEntityId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RefreshTokens_Token",
-                table: "RefreshTokens",
-                column: "Token",
                 unique: true);
 
             migrationBuilder.CreateIndex(

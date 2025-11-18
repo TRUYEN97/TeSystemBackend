@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using TeSystemBackend.Core.Entities;
-using TeSystemBackend.Data.Abstractions;
+using TeSystemBackend.Data;
 using TeSystemBackend.Data.Entities;
 using TeSystemBackend.Service.Exceptions;
 using TeSystemBackend.Service.Interfaces;
@@ -17,12 +17,12 @@ namespace TeSystemBackend.Service
     public class AuthService : IAuthService
     {
         private readonly UserManager<AppUserEntity> _userManager;
-        private readonly IAppDbContext _dbContext;
+        private readonly AppDbContext _dbContext;
         private readonly IConfigurationSection _jwtSettings;
 
         public AuthService(
             UserManager<AppUserEntity> userManager,
-            IAppDbContext dbContext,
+            AppDbContext dbContext,
             IConfiguration config)
         {
             _userManager = userManager;
@@ -39,7 +39,7 @@ namespace TeSystemBackend.Service
                 .FirstOrDefaultAsync(x => x.UserName == username);
 
             if (user == null)
-                throw new NotFoundException("Người dùng không tồn tại");
+                throw new NotFoundException("Sai tên người dùng");
 
             var validPassword = await _userManager.CheckPasswordAsync(user, password);
             if (!validPassword)
