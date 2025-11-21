@@ -1,6 +1,0 @@
-@TeSystemBackend_HostAddress = http://localhost:5082
-
-GET {{TeSystemBackend_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
