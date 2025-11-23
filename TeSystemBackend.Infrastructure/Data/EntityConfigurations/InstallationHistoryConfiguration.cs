@@ -17,12 +17,9 @@ public class InstallationHistoryConfiguration : IEntityTypeConfiguration<Install
             .IsRequired()
             .HasConversion<int>();
 
-        builder.Property(ih => ih.Notes)
-            .HasMaxLength(2000);
-
         builder.HasIndex(ih => ih.ComputerId);
         builder.HasIndex(ih => ih.SoftwareId);
-        builder.HasIndex(ih => ih.SwVersionId);
+        builder.HasIndex(ih => ih.SoftwareVersionId);
         builder.HasIndex(ih => ih.InstalledBy);
         builder.HasIndex(ih => ih.InstalledAt);
 
@@ -37,9 +34,9 @@ public class InstallationHistoryConfiguration : IEntityTypeConfiguration<Install
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
 
-        builder.HasOne(ih => ih.SwVersion)
+        builder.HasOne(ih => ih.SoftwareVersion)
             .WithMany(sv => sv.InstallationHistories)
-            .HasForeignKey(ih => ih.SwVersionId)
+            .HasForeignKey(ih => ih.SoftwareVersionId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(ih => ih.InstalledByUser)

@@ -16,9 +16,6 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(t => t.Description)
-            .HasMaxLength(1000);
-
         builder.Property(t => t.IsActive)
             .IsRequired()
             .HasDefaultValue(true);
@@ -26,17 +23,11 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
         builder.HasIndex(t => t.Name);
 
         builder.HasIndex(t => t.ParentTeamId);
-        builder.HasIndex(t => t.DepartmentId);
 
         builder.HasOne(t => t.ParentTeam)
             .WithMany(t => t.ChildTeams)
             .HasForeignKey(t => t.ParentTeamId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(t => t.Department)
-            .WithMany(d => d.Teams)
-            .HasForeignKey(t => t.DepartmentId)
-            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasMany(t => t.Users)
             .WithOne(u => u.Team)

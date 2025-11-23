@@ -16,25 +16,24 @@ public class ComputerConfiguration : IEntityTypeConfiguration<Computer>
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(c => c.Description)
-            .HasMaxLength(1000);
-
         builder.Property(c => c.MacAddress)
             .HasMaxLength(50);
 
         builder.Property(c => c.IpAddress)
             .HasMaxLength(50);
 
-        builder.Property(c => c.OperatingSystem)
-            .HasMaxLength(200);
-
         builder.Property(c => c.IsActive)
             .IsRequired()
             .HasDefaultValue(true);
 
         builder.HasIndex(c => c.Name);
-
         builder.HasIndex(c => c.MacAddress);
+        builder.HasIndex(c => c.OwnerTeamId);
+
+        builder.HasOne(c => c.OwnerTeam)
+            .WithMany()
+            .HasForeignKey(c => c.OwnerTeamId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasMany(c => c.ComputerSoftwares)
             .WithOne(cs => cs.Computer)

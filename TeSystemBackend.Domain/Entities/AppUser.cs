@@ -12,8 +12,8 @@ public class AppUser : IdentityUser<int>
     public DateTime? UpdatedAt { get; set; }
 
     public virtual Team? Team { get; set; }
-    public virtual List<AclEntry> AclEntries { get; set; } = new List<AclEntry>();
-    public virtual List<InstallationHistory> InstallationHistories { get; set; } = new List<InstallationHistory>();
-    public virtual List<ChangeLog> ChangeLogs { get; set; } = new List<ChangeLog>();
+    public virtual List<AclEntry> AclEntries { get; set; } = [];
+    public virtual List<InstallationHistory> InstallationHistories { get; set; } = [];
+    public virtual List<ChangeLog> ChangeLogs { get; set; } = [];
 }
 

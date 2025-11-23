@@ -17,7 +17,22 @@ public class ComputerSoftwareConfiguration : IEntityTypeConfiguration<ComputerSo
 
         builder.HasIndex(cs => cs.ComputerId);
         builder.HasIndex(cs => cs.SoftwareId);
-        builder.HasIndex(cs => cs.InstalledSwVersionId);
+        builder.HasIndex(cs => cs.InstalledSoftwareVersionId);
+
+        builder.HasOne(cs => cs.Computer)
+            .WithMany(c => c.ComputerSoftwares)
+            .HasForeignKey(cs => cs.ComputerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(cs => cs.Software)
+            .WithMany(s => s.ComputerSoftwares)
+            .HasForeignKey(cs => cs.SoftwareId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(cs => cs.InstalledSoftwareVersion)
+            .WithMany(sv => sv.ComputerSoftwares)
+            .HasForeignKey(cs => cs.InstalledSoftwareVersionId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
 

@@ -4,11 +4,11 @@ using TeSystemBackend.Domain.Entities;
 
 namespace TeSystemBackend.Infrastructure.Data.EntityConfigurations;
 
-public class SwVersionConfiguration : IEntityTypeConfiguration<SwVersion>
+public class SoftwareVersionConfiguration : IEntityTypeConfiguration<SoftwareVersion>
 {
-    public void Configure(EntityTypeBuilder<SwVersion> builder)
+    public void Configure(EntityTypeBuilder<SoftwareVersion> builder)
     {
-        builder.ToTable("SwVersions");
+        builder.ToTable("SoftwareVersions");
 
         builder.HasKey(sv => sv.Id);
 
@@ -26,20 +26,26 @@ public class SwVersionConfiguration : IEntityTypeConfiguration<SwVersion>
         builder.HasIndex(sv => new { sv.SoftwareId, sv.Version })
             .IsUnique();
 
-        builder.HasMany(sv => sv.SwFiles)
-            .WithOne(sf => sf.SwVersion)
-            .HasForeignKey(sf => sf.SwVersionId)
+        builder.HasOne(sv => sv.Software)
+            .WithMany(s => s.SoftwareVersions)
+            .HasForeignKey(sv => sv.SoftwareId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(sv => sv.SoftwareFiles)
+            .WithOne(sf => sf.SoftwareVersion)
+            .HasForeignKey(sf => sf.SoftwareVersionId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(sv => sv.ComputerSoftwares)
-            .WithOne(cs => cs.InstalledSwVersion)
-            .HasForeignKey(cs => cs.InstalledSwVersionId)
+            .WithOne(cs => cs.InstalledSoftwareVersion)
+            .HasForeignKey(cs => cs.InstalledSoftwareVersionId)
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasMany(sv => sv.InstallationHistories)
-            .WithOne(ih => ih.SwVersion)
-            .HasForeignKey(ih => ih.SwVersionId)
+            .WithOne(ih => ih.SoftwareVersion)
+            .HasForeignKey(ih => ih.SoftwareVersionId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
+
 

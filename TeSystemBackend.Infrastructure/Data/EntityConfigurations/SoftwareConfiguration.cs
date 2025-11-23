@@ -16,19 +16,19 @@ public class SoftwareConfiguration : IEntityTypeConfiguration<Software>
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(s => s.Description)
-            .HasMaxLength(1000);
-
-        builder.Property(s => s.Vendor)
-            .HasMaxLength(200);
-
         builder.Property(s => s.IsActive)
             .IsRequired()
             .HasDefaultValue(true);
 
         builder.HasIndex(s => s.Name);
+        builder.HasIndex(s => s.OwnerTeamId);
 
-        builder.HasMany(s => s.SwVersions)
+        builder.HasOne(s => s.OwnerTeam)
+            .WithMany()
+            .HasForeignKey(s => s.OwnerTeamId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasMany(s => s.SoftwareVersions)
             .WithOne(sv => sv.Software)
             .HasForeignKey(sv => sv.SoftwareId)
             .OnDelete(DeleteBehavior.Cascade);

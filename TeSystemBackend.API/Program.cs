@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
+using TeSystemBackend.Application.Repositories;
 using TeSystemBackend.Domain.Entities;
 using TeSystemBackend.Infrastructure.Data;
 
@@ -34,6 +35,8 @@ namespace TeSystemBackend.API
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

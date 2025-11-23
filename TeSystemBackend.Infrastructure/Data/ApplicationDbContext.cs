@@ -13,12 +13,13 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole<int>
     }
 
     public DbSet<Software> Softwares { get; set; }
-    public DbSet<SwVersion> SwVersions { get; set; }
-    public DbSet<SwFile> SwFiles { get; set; }
+    public DbSet<SoftwareVersion> SoftwareVersions { get; set; }
+    public DbSet<SoftwareFile> SoftwareFiles { get; set; }
+    public DbSet<SoftwareFileLocation> SoftwareFileLocations { get; set; }
     public DbSet<Computer> Computers { get; set; }
     public DbSet<ComputerSoftware> ComputerSoftwares { get; set; }
     public DbSet<Team> Teams { get; set; }
-    public DbSet<Department> Departments { get; set; }
+    public DbSet<ResourceType> ResourceTypes { get; set; }
     public DbSet<AclEntry> AclEntries { get; set; }
     public DbSet<InstallationHistory> InstallationHistories { get; set; }
     public DbSet<ChangeLog> ChangeLogs { get; set; }

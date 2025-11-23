@@ -13,9 +13,8 @@ public class AclEntryConfiguration : IEntityTypeConfiguration<AclEntry>
 
         builder.HasKey(ae => ae.Id);
 
-        builder.Property(ae => ae.ResourceType)
-            .IsRequired()
-            .HasConversion<int>();
+        builder.Property(ae => ae.ResourceTypeId)
+            .IsRequired();
 
         builder.Property(ae => ae.ResourceId)
             .IsRequired();
@@ -47,10 +46,15 @@ public class AclEntryConfiguration : IEntityTypeConfiguration<AclEntry>
             .IsRequired()
             .HasDefaultValue(false);
 
-        builder.HasIndex(ae => new { ae.ResourceType, ae.ResourceId });
+        builder.HasIndex(ae => new { ae.ResourceTypeId, ae.ResourceId });
         builder.HasIndex(ae => new { ae.PrincipalType, ae.PrincipalId });
         builder.HasIndex(ae => ae.AceOrder);
-        builder.HasIndex(ae => new { ae.ResourceType, ae.ResourceId, ae.PrincipalType, ae.PrincipalId, ae.Permission });
+        builder.HasIndex(ae => new { ae.ResourceTypeId, ae.ResourceId, ae.PrincipalType, ae.PrincipalId, ae.Permission });
+
+        builder.HasOne(ae => ae.ResourceType)
+            .WithMany(rr => rr.AclEntries)
+            .HasForeignKey(ae => ae.ResourceTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(ae => ae.CreatedByUser)
             .WithMany(u => u.AclEntries)
