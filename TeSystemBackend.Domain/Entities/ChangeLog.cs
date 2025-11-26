@@ -12,7 +12,5 @@ public class ChangeLog
     public string? NewValue { get; set; }
     public int ChangedBy { get; set; }
     public DateTime ChangedAt { get; set; } = DateTime.UtcNow;
-
-    public virtual AppUser ChangedByUser { get; set; } = null!;
 }
 

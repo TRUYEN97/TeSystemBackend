@@ -2,8 +2,9 @@ namespace TeSystemBackend.Domain.Enums;
 
 public enum PrincipalType
 {
-    User = 1,
-    Team = 2,
+    User = 0,
+    Team = 1,
+    TeamRoleLocation = 2,
     Role = 3
 }
 

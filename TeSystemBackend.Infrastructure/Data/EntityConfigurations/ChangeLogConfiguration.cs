@@ -33,11 +33,6 @@ public class ChangeLogConfiguration : IEntityTypeConfiguration<ChangeLog>
         builder.HasIndex(cl => new { cl.EntityType, cl.EntityId });
         builder.HasIndex(cl => cl.ChangedBy);
         builder.HasIndex(cl => cl.ChangedAt);
-
-        builder.HasOne(cl => cl.ChangedByUser)
-            .WithMany(u => u.ChangeLogs)
-            .HasForeignKey(cl => cl.ChangedBy)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 

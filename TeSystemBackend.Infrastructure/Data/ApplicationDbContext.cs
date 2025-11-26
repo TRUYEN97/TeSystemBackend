@@ -12,17 +12,19 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole<int>
     {
     }
 
-    public DbSet<Software> Softwares { get; set; }
-    public DbSet<SoftwareVersion> SoftwareVersions { get; set; }
-    public DbSet<SoftwareFile> SoftwareFiles { get; set; }
-    public DbSet<SoftwareFileLocation> SoftwareFileLocations { get; set; }
     public DbSet<Computer> Computers { get; set; }
-    public DbSet<ComputerSoftware> ComputerSoftwares { get; set; }
+    public DbSet<Department> Departments { get; set; }
     public DbSet<Team> Teams { get; set; }
-    public DbSet<ResourceType> ResourceTypes { get; set; }
+    public DbSet<UserTeam> UserTeams { get; set; }
+    public DbSet<Role> AppRoles { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<PerRole> PerRoles { get; set; }
+    public DbSet<Location> Locations { get; set; }
+    public DbSet<TeamRoleLocation> TeamRoleLocations { get; set; }
+    public DbSet<AclClass> AclClasses { get; set; }
+    public DbSet<AclObjectIdentity> AclObjectIdentities { get; set; }
+    public DbSet<AclSid> AclSids { get; set; }
     public DbSet<AclEntry> AclEntries { get; set; }
-    public DbSet<InstallationHistory> InstallationHistories { get; set; }
-    public DbSet<ChangeLog> ChangeLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -1,13 +1,12 @@
-namespace TeSystemBackend.Domain.Entities;
+namespace TeSystemBackend.Application.DTOs.Computers;
 
-public class Computer
+public class ComputerDto
 {
     public int Id { get; set; }
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public int LocationId { get; set; }
     public string? Description { get; set; }
-
-    public virtual Location Location { get; set; } = null!;
 }
+
 

@@ -1,25 +1,17 @@
-using TeSystemBackend.Domain.Enums;
-
 namespace TeSystemBackend.Domain.Entities;
 
 public class AclEntry
 {
     public int Id { get; set; }
-    public int ResourceTypeId { get; set; }
-    public int ResourceId { get; set; }
-    public PrincipalType PrincipalType { get; set; }
-    public int PrincipalId { get; set; }
-    public string Permission { get; set; } = string.Empty;
-    public int AceOrder { get; set; }
-    public bool IsAllow { get; set; } = true;
-    public bool IsDeny { get; set; } = false;
-    public bool IsInherited { get; set; } = false;
-    public int? GrantFromScopeId { get; set; }
-    public DateTime? ExpiresAt { get; set; }
-    public int CreatedBy { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public int ObjectIdentityId { get; set; }
+    public int SidId { get; set; }
+    public int PermissionId { get; set; }
+    public bool Granting { get; set; }
+    public bool AuditSuccess { get; set; }
+    public bool AuditFailure { get; set; }
 
-    public virtual ResourceType ResourceType { get; set; } = null!;
-    public virtual AppUser CreatedByUser { get; set; } = null!;
+    public virtual AclObjectIdentity ObjectIdentity { get; set; } = null!;
+    public virtual AclSid Sid { get; set; } = null!;
+    public virtual Permission Permission { get; set; } = null!;
 }
 

@@ -9,57 +9,35 @@ public class AclEntryConfiguration : IEntityTypeConfiguration<AclEntry>
 {
     public void Configure(EntityTypeBuilder<AclEntry> builder)
     {
-        builder.ToTable("AclEntries");
+        builder.ToTable("Acl_Entry");
 
         builder.HasKey(ae => ae.Id);
 
-        builder.Property(ae => ae.ResourceTypeId)
+        builder.Property(ae => ae.Granting)
             .IsRequired();
 
-        builder.Property(ae => ae.ResourceId)
+        builder.Property(ae => ae.AuditSuccess)
             .IsRequired();
 
-        builder.Property(ae => ae.PrincipalType)
-            .IsRequired()
-            .HasConversion<int>();
-
-        builder.Property(ae => ae.PrincipalId)
+        builder.Property(ae => ae.AuditFailure)
             .IsRequired();
 
-        builder.Property(ae => ae.Permission)
-            .IsRequired()
-            .HasMaxLength(100);
+        builder.HasIndex(ae => new { ae.ObjectIdentityId, ae.SidId, ae.PermissionId });
 
-        builder.Property(ae => ae.AceOrder)
-            .IsRequired()
-            .HasDefaultValue(0);
+        builder.HasOne(ae => ae.ObjectIdentity)
+            .WithMany(oi => oi.Entries)
+            .HasForeignKey(ae => ae.ObjectIdentityId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(ae => ae.IsAllow)
-            .IsRequired()
-            .HasDefaultValue(true);
+        builder.HasOne(ae => ae.Sid)
+            .WithMany(s => s.Entries)
+            .HasForeignKey(ae => ae.SidId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(ae => ae.IsDeny)
-            .IsRequired()
-            .HasDefaultValue(false);
-
-        builder.Property(ae => ae.IsInherited)
-            .IsRequired()
-            .HasDefaultValue(false);
-
-        builder.HasIndex(ae => new { ae.ResourceTypeId, ae.ResourceId });
-        builder.HasIndex(ae => new { ae.PrincipalType, ae.PrincipalId });
-        builder.HasIndex(ae => ae.AceOrder);
-        builder.HasIndex(ae => new { ae.ResourceTypeId, ae.ResourceId, ae.PrincipalType, ae.PrincipalId, ae.Permission });
-
-        builder.HasOne(ae => ae.ResourceType)
-            .WithMany(rr => rr.AclEntries)
-            .HasForeignKey(ae => ae.ResourceTypeId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(ae => ae.CreatedByUser)
-            .WithMany(u => u.AclEntries)
-            .HasForeignKey(ae => ae.CreatedBy)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(ae => ae.Permission)
+            .WithMany(p => p.AclEntries)
+            .HasForeignKey(ae => ae.PermissionId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 
