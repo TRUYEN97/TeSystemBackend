@@ -8,9 +8,11 @@ using MySqlConnector;
 using System.Text;
 using TeSystemBackend.Application.DTOs;
 using TeSystemBackend.Application.DTOs.Auth;
+using TeSystemBackend.Application.DTOs.Users;
 using TeSystemBackend.Application.Repositories;
 using TeSystemBackend.Application.Services;
 using TeSystemBackend.Application.Validators.Auth;
+using TeSystemBackend.Application.Validators.Users;
 using TeSystemBackend.Domain.Entities;
 using TeSystemBackend.Infrastructure.Data;
 
@@ -82,10 +84,13 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IComputerRepository, ComputerRepository>();
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
             builder.Services.AddScoped<IValidator<LoginRequest>, LoginRequestValidator>();
             builder.Services.AddScoped<IValidator<RefreshTokenRequest>, RefreshTokenRequestValidator>();
+            builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
+            builder.Services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
 
             builder.Services.AddControllers()
                 .ConfigureApiBehaviorOptions(options =>
@@ -102,7 +107,11 @@ namespace TeSystemBackend.API
                                 }))
                             .ToList();
 
-                        var response = ApiResponse<object>.Fail(ErrorCodes.ValidationFailed, "Validation failed");
+                        var message = errors.Count > 0
+                            ? errors[0].Error
+                            : "Validation failed";
+
+                        var response = ApiResponse<object>.Fail(ErrorCodes.ValidationFailed, message);
                         response.Data = errors;
 
                         return new ObjectResult(response)

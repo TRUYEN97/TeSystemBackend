@@ -45,8 +45,7 @@ public class GlobalExceptionHandlingMiddleware
 
         if (exception is FluentValidation.ValidationException fvEx)
         {
-            message = "Validation failed";
-            data = fvEx.Errors
+            var errors = fvEx.Errors
                 .Select(e => new
                 {
                     Field = e.PropertyName,
@@ -54,6 +53,42 @@ public class GlobalExceptionHandlingMiddleware
                     AttemptedValue = e.AttemptedValue
                 })
                 .ToList();
+
+            if (errors.Count > 0)
+            {
+                message = errors[0].Error;
+            }
+            else
+            {
+                message = "Validation failed";
+            }
+
+            data = errors;
+        }
+        else if (exception is UnauthorizedAccessException unauthorizedEx)
+        {
+            if (unauthorizedEx.Message.Contains("username", StringComparison.OrdinalIgnoreCase))
+            {
+                data = new[]
+                {
+                    new
+                    {
+                        Field = "Username",
+                        Error = unauthorizedEx.Message
+                    }
+                };
+            }
+            else if (unauthorizedEx.Message.Contains("password", StringComparison.OrdinalIgnoreCase))
+            {
+                data = new[]
+                {
+                    new
+                    {
+                        Field = "Password",
+                        Error = unauthorizedEx.Message
+                    }
+                };
+            }
         }
 
         context.Response.ContentType = "application/json";

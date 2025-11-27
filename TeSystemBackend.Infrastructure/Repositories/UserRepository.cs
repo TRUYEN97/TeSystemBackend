@@ -40,6 +40,38 @@ public class UserRepository : IUserRepository
     {
         return await _userManager.CheckPasswordAsync(user, password);
     }
+
+    public async Task<List<AppUser>> GetAllAsync()
+    {
+        return await _userManager.Users.ToListAsync();
+    }
+
+    public async Task<AppUser> UpdateAsync(AppUser user)
+    {
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(";", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException(errors);
+        }
+
+        return user;
+    }
+
+    public async Task DeleteAsync(AppUser user)
+    {
+        var result = await _userManager.DeleteAsync(user);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(";", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException(errors);
+        }
+    }
+
+    public async Task<AppUser?> GetByUserNameAsync(string userName)
+    {
+        return await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+    }
 }
 
 

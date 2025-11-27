@@ -25,15 +25,21 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        var existing = await _userRepository.GetByEmailAsync(request.Email);
-        if (existing != null)
+        var existingEmail = await _userRepository.GetByEmailAsync(request.Email);
+        if (existingEmail != null)
         {
             throw new InvalidOperationException("Email already exists.");
         }
 
+        var existingUserName = await _userRepository.GetByUserNameAsync(request.Username);
+        if (existingUserName != null)
+        {
+            throw new InvalidOperationException("Username already exists.");
+        }
+
         var user = new AppUser
         {
-            UserName = request.Email,
+            UserName = request.Username,
             Email = request.Email,
             Name = request.Name
         };
@@ -56,16 +62,16 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email);
+        var user = await _userRepository.GetByUserNameAsync(request.Username);
         if (user == null)
         {
-            throw new UnauthorizedAccessException("Invalid credentials.");
+            throw new UnauthorizedAccessException("Sai username");
         }
 
         var valid = await _userRepository.CheckPasswordAsync(user, request.Password);
         if (!valid)
         {
-            throw new UnauthorizedAccessException("Invalid credentials.");
+            throw new UnauthorizedAccessException("Sai password");
         }
 
         var token = GenerateJwtToken(user);
