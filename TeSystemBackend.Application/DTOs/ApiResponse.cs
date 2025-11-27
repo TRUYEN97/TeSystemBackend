@@ -7,24 +7,19 @@ public class ApiResponse<T>
     public T? Data { get; set; }
 
     public static ApiResponse<T> Success(T data, string message = "Success")
-    {
-        return new ApiResponse<T>
+        => new()
         {
-            ErrorCode = 0,
+            ErrorCode = ErrorCodes.Success,
             Message = message,
             Data = data
         };
-    }
 
     public static ApiResponse<T> Fail(int errorCode, string message)
-    {
-        return new ApiResponse<T>
+        => new()
         {
             ErrorCode = errorCode,
             Message = message,
             Data = default
         };
-    }
 }
-
 

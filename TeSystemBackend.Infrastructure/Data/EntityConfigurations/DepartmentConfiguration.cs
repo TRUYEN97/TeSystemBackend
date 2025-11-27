@@ -27,3 +27,4 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
 }
 
 
+

@@ -7,5 +7,6 @@ public class AppUser : IdentityUser<int>
     public string Name { get; set; } = string.Empty;
 
     public virtual List<UserTeam> UserTeams { get; set; } = new();
+    public virtual List<RefreshToken> RefreshTokens { get; set; } = new();
 }
 

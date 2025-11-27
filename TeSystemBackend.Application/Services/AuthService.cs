@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
@@ -12,11 +13,13 @@ namespace TeSystemBackend.Application.Services;
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IConfiguration _configuration;
 
-    public AuthService(IUserRepository userRepository, IConfiguration configuration)
+    public AuthService(IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, IConfiguration configuration)
     {
         _userRepository = userRepository;
+        _refreshTokenRepository = refreshTokenRepository;
         _configuration = configuration;
     }
 
@@ -38,13 +41,16 @@ public class AuthService : IAuthService
         var created = await _userRepository.CreateAsync(user, request.Password);
 
         var token = GenerateJwtToken(created);
+        var refreshToken = await GenerateAndStoreRefreshTokenAsync(created);
 
         return new AuthResponse
         {
             AccessToken = token,
             UserId = created.Id,
             Email = created.Email ?? string.Empty,
-            Name = created.Name
+            Name = created.Name,
+            RefreshToken = refreshToken.Token,
+            RefreshTokenExpiresAt = refreshToken.ExpiresAt
         };
     }
 
@@ -53,30 +59,74 @@ public class AuthService : IAuthService
         var user = await _userRepository.GetByEmailAsync(request.Email);
         if (user == null)
         {
-            throw new InvalidOperationException("Invalid credentials.");
+            throw new UnauthorizedAccessException("Invalid credentials.");
         }
 
         var valid = await _userRepository.CheckPasswordAsync(user, request.Password);
         if (!valid)
         {
-            throw new InvalidOperationException("Invalid credentials.");
+            throw new UnauthorizedAccessException("Invalid credentials.");
         }
 
         var token = GenerateJwtToken(user);
+        var refreshToken = await GenerateAndStoreRefreshTokenAsync(user);
 
         return new AuthResponse
         {
             AccessToken = token,
             UserId = user.Id,
             Email = user.Email ?? string.Empty,
-            Name = user.Name
+            Name = user.Name,
+            RefreshToken = refreshToken.Token,
+            RefreshTokenExpiresAt = refreshToken.ExpiresAt
         };
+    }
+
+    public async Task<AuthResponse> RefreshTokenAsync(string refreshToken)
+    {
+        var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken);
+        if (existingToken == null || !existingToken.IsActive)
+        {
+            throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+        }
+
+        var user = existingToken.User;
+
+        existingToken.RevokedAt = DateTime.UtcNow;
+        var newRefreshToken = await GenerateAndStoreRefreshTokenAsync(user);
+        existingToken.ReplacedByToken = newRefreshToken.Token;
+        await _refreshTokenRepository.UpdateAsync(existingToken);
+
+        var newAccessToken = GenerateJwtToken(user);
+
+        return new AuthResponse
+        {
+            AccessToken = newAccessToken,
+            UserId = user.Id,
+            Email = user.Email ?? string.Empty,
+            Name = user.Name,
+            RefreshToken = newRefreshToken.Token,
+            RefreshTokenExpiresAt = newRefreshToken.ExpiresAt
+        };
+    }
+
+    public async Task RevokeRefreshTokenAsync(string refreshToken)
+    {
+        var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken);
+        if (existingToken == null || !existingToken.IsActive)
+        {
+            return;
+        }
+
+        existingToken.RevokedAt = DateTime.UtcNow;
+        await _refreshTokenRepository.UpdateAsync(existingToken);
     }
 
     private string GenerateJwtToken(AppUser user)
     {
         var jwtSection = _configuration.GetSection("Jwt");
-        var key = jwtSection["Key"];
+        var key = Environment.GetEnvironmentVariable("JWT_KEY")
+                  ?? jwtSection["Key"];
         var issuer = jwtSection["Issuer"];
         var audience = jwtSection["Audience"];
 
@@ -104,6 +154,35 @@ public class AuthService : IAuthService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    private async Task<RefreshToken> GenerateAndStoreRefreshTokenAsync(AppUser user)
+    {
+        var jwtSection = _configuration.GetSection("Jwt");
+        var refreshTokenDaysConfig = jwtSection["RefreshTokenExpiryDays"];
+
+        var refreshTokenDays = 7;
+        if (int.TryParse(refreshTokenDaysConfig, out var configDays) && configDays > 0)
+        {
+            refreshTokenDays = configDays;
+        }
+
+        var randomNumber = new byte[64];
+        RandomNumberGenerator.Fill(randomNumber);
+        var token = Convert.ToBase64String(randomNumber);
+
+        var refreshToken = new RefreshToken
+        {
+            Token = token,
+            UserId = user.Id,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(refreshTokenDays)
+        };
+
+        await _refreshTokenRepository.AddAsync(refreshToken);
+
+        return refreshToken;
+    }
 }
+
 
 

@@ -24,7 +24,8 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole<int>
     public DbSet<AclClass> AclClasses { get; set; }
     public DbSet<AclObjectIdentity> AclObjectIdentities { get; set; }
     public DbSet<AclSid> AclSids { get; set; }
-    public DbSet<AclEntry> AclEntries { get; set; }
+        public DbSet<AclEntry> AclEntries { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

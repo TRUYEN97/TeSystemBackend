@@ -28,3 +28,4 @@ public class UserTeamConfiguration : IEntityTypeConfiguration<UserTeam>
 }
 
 
+
