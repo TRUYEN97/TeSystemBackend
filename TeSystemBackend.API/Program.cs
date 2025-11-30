@@ -14,6 +14,8 @@ using TeSystemBackend.Application.Services;
 using TeSystemBackend.Application.Validators.Auth;
 using TeSystemBackend.Application.Validators.Users;
 using TeSystemBackend.Application.Validators.Computers;
+using TeSystemBackend.Application.Validators.Teams;
+using TeSystemBackend.Application.Validators.Acl;
 using TeSystemBackend.Application.DTOs.Computers;
 using TeSystemBackend.Domain.Entities;
 using TeSystemBackend.Infrastructure.Data;
@@ -88,6 +90,8 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IComputerService, ComputerService>();
+            builder.Services.AddScoped<ITeamService, TeSystemBackend.Infrastructure.Services.TeamService>();
+            builder.Services.AddScoped<IAclService, TeSystemBackend.Infrastructure.Services.AclService>();
 
             builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
             builder.Services.AddScoped<IValidator<LoginRequest>, LoginRequestValidator>();
@@ -96,6 +100,8 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
             builder.Services.AddScoped<IValidator<CreateComputerDto>, CreateComputerDtoValidator>();
             builder.Services.AddScoped<IValidator<UpdateComputerDto>, UpdateComputerDtoValidator>();
+            builder.Services.AddScoped<IValidator<AddUserToTeamRequest>, AddUserToTeamRequestValidator>();
+            builder.Services.AddScoped<IValidator<AssignPermissionRequest>, AssignPermissionRequestValidator>();
 
             builder.Services.AddControllers()
                 .ConfigureApiBehaviorOptions(options =>
@@ -142,6 +148,13 @@ namespace TeSystemBackend.API
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                await SeedData.SeedAdminAsync(userManager, dbContext);
+            }
 
             app.MapControllers();
 
