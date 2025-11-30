@@ -13,6 +13,8 @@ using TeSystemBackend.Application.Repositories;
 using TeSystemBackend.Application.Services;
 using TeSystemBackend.Application.Validators.Auth;
 using TeSystemBackend.Application.Validators.Users;
+using TeSystemBackend.Application.Validators.Computers;
+using TeSystemBackend.Application.DTOs.Computers;
 using TeSystemBackend.Domain.Entities;
 using TeSystemBackend.Infrastructure.Data;
 
@@ -85,12 +87,15 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IComputerService, ComputerService>();
 
             builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
             builder.Services.AddScoped<IValidator<LoginRequest>, LoginRequestValidator>();
             builder.Services.AddScoped<IValidator<RefreshTokenRequest>, RefreshTokenRequestValidator>();
             builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
             builder.Services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
+            builder.Services.AddScoped<IValidator<CreateComputerDto>, CreateComputerDtoValidator>();
+            builder.Services.AddScoped<IValidator<UpdateComputerDto>, UpdateComputerDtoValidator>();
 
             builder.Services.AddControllers()
                 .ConfigureApiBehaviorOptions(options =>

@@ -7,7 +7,7 @@ using TeSystemBackend.Application.Services;
 namespace TeSystemBackend.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/users")]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -68,8 +68,9 @@ public class UsersController : ControllerBase
     public async Task<ApiResponse<object>> Delete(int id)
     {
         await _userService.DeleteAsync(id);
-        return ApiResponse<object>.Success(null);
+        return ApiResponse<object>.Success(null!);
     }
 }
+
 
 

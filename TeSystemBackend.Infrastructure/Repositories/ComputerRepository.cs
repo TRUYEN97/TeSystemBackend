@@ -28,11 +28,29 @@ public class ComputerRepository : IComputerRepository
             .FirstOrDefaultAsync(c => c.Code == code);
     }
 
+    public async Task<List<Computer>> GetAllAsync()
+    {
+        return await _context.Computers
+            .Include(c => c.Location)
+            .ToListAsync();
+    }
+
     public async Task AddAsync(Computer computer)
     {
         await _context.Computers.AddAsync(computer);
     }
+
+    public async Task UpdateAsync(Computer computer)
+    {
+        _context.Computers.Update(computer);
+    }
+
+    public async Task DeleteAsync(Computer computer)
+    {
+        _context.Computers.Remove(computer);
+    }
 }
+
 
 
 

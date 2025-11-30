@@ -27,3 +27,4 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
 
 
 
+

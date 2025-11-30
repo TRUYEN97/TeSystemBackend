@@ -34,3 +34,4 @@ public class TeamRoleLocationConfiguration : IEntityTypeConfiguration<TeamRoleLo
 
 
 
+
