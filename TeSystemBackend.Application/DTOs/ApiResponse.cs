@@ -1,3 +1,5 @@
+using TeSystemBackend.Application.Constants;
+
 namespace TeSystemBackend.Application.DTOs;
 
 public class ApiResponse<T>
@@ -6,7 +8,7 @@ public class ApiResponse<T>
     public string Message { get; set; } = string.Empty;
     public T? Data { get; set; }
 
-    public static ApiResponse<T> Success(T data, string message = "Success")
+    public static ApiResponse<T> Success(T data, string message = ErrorMessages.Success)
         => new()
         {
             ErrorCode = ErrorCodes.Success,

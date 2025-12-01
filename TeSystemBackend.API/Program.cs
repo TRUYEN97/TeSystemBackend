@@ -6,9 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MySqlConnector;
 using System.Text;
+using TeSystemBackend.Application.Constants;
 using TeSystemBackend.Application.DTOs;
 using TeSystemBackend.Application.DTOs.Auth;
 using TeSystemBackend.Application.DTOs.Users;
+using TeSystemBackend.Application.Helpers;
 using TeSystemBackend.Application.Repositories;
 using TeSystemBackend.Application.Services;
 using TeSystemBackend.Application.Validators.Auth;
@@ -26,13 +28,13 @@ namespace TeSystemBackend.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            var connectionString = builder.Configuration.GetConnectionString(ConfigurationKeys.DefaultConnection);
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 if (string.IsNullOrEmpty(connectionString))
                 {
-                    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+                    throw new InvalidOperationException(ErrorMessages.ConnectionStringNotFound);
                 }
                 options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21)));
             });
@@ -49,16 +51,8 @@ namespace TeSystemBackend.API
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-            var jwtSection = builder.Configuration.GetSection("Jwt");
-            var key = Environment.GetEnvironmentVariable("JWT_KEY")
-                      ?? jwtSection["Key"];
-            var issuer = jwtSection["Issuer"];
-            var audience = jwtSection["Audience"];
-
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new InvalidOperationException("JWT configuration is missing 'Key'.");
-            }
+            var jwtConfig = JwtConfiguration.FromConfiguration(builder.Configuration);
+            builder.Services.AddSingleton(jwtConfig);
 
             builder.Services
                 .AddAuthentication(options =>
@@ -70,14 +64,14 @@ namespace TeSystemBackend.API
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuer = !string.IsNullOrWhiteSpace(issuer),
-                        ValidateAudience = !string.IsNullOrWhiteSpace(audience),
+                        ValidateIssuer = !string.IsNullOrWhiteSpace(jwtConfig.Issuer),
+                        ValidateAudience = !string.IsNullOrWhiteSpace(jwtConfig.Audience),
                         ValidateIssuerSigningKey = true,
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.FromMinutes(1),
-                        ValidIssuer = issuer,
-                        ValidAudience = audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+                        ValidIssuer = jwtConfig.Issuer,
+                        ValidAudience = jwtConfig.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Key))
                     };
                 });
 
@@ -114,7 +108,7 @@ namespace TeSystemBackend.API
 
                         var message = errors.Count > 0
                             ? errors[0].Error
-                            : "Validation failed";
+                            : ErrorMessages.ValidationFailed;
 
                         var response = ApiResponse<object>.Fail(ErrorCodes.ValidationFailed, message);
                         response.Data = errors;

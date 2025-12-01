@@ -14,6 +14,7 @@ public class UnitOfWork : IUnitOfWork
     }
 
     public IComputerRepository Computers => new ComputerRepository(_context);
+    public IRefreshTokenRepository RefreshTokens => new RefreshTokenRepository(_context);
 
     public async Task<int> SaveChangesAsync()
     {

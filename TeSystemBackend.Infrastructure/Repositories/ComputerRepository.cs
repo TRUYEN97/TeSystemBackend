@@ -40,14 +40,16 @@ public class ComputerRepository : IComputerRepository
         await _context.Computers.AddAsync(computer);
     }
 
-    public async Task UpdateAsync(Computer computer)
+    public Task UpdateAsync(Computer computer)
     {
         _context.Computers.Update(computer);
+        return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(Computer computer)
+    public Task DeleteAsync(Computer computer)
     {
         _context.Computers.Remove(computer);
+        return Task.CompletedTask;
     }
 }
 

@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using TeSystemBackend.API.Extensions;
 using TeSystemBackend.Application.DTOs;
 using TeSystemBackend.Application.DTOs.Users;
 using TeSystemBackend.Application.Services;
@@ -41,11 +42,7 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<ApiResponse<UserDto>> Create(CreateUserRequest request)
     {
-        var validationResult = await _createValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
-        {
-            throw new FluentValidation.ValidationException(validationResult.Errors);
-        }
+        await _createValidator.ValidateAndThrowAsync(request);
 
         var user = await _userService.CreateAsync(request);
         return ApiResponse<UserDto>.Success(user);
@@ -54,11 +51,7 @@ public class UsersController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<ApiResponse<UserDto>> Update(int id, UpdateUserRequest request)
     {
-        var validationResult = await _updateValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
-        {
-            throw new FluentValidation.ValidationException(validationResult.Errors);
-        }
+        await _updateValidator.ValidateAndThrowAsync(request);
 
         var user = await _userService.UpdateAsync(id, request);
         return ApiResponse<UserDto>.Success(user);

@@ -1,3 +1,4 @@
+using TeSystemBackend.Application.Constants;
 using TeSystemBackend.Application.DTOs.Computers;
 using TeSystemBackend.Application.Repositories;
 using TeSystemBackend.Domain.Entities;
@@ -26,7 +27,7 @@ public class ComputerService : IComputerService
         var computer = await _computerRepository.GetByIdAsync(id);
         if (computer == null)
         {
-            throw new KeyNotFoundException("Máy tính không tồn tại.");
+            throw new KeyNotFoundException(ErrorMessages.ComputerNotFound);
         }
 
         return MapToDto(computer);
@@ -37,7 +38,7 @@ public class ComputerService : IComputerService
         var existing = await _computerRepository.GetByCodeAsync(request.Code);
         if (existing != null)
         {
-            throw new InvalidOperationException("Mã máy tính đã tồn tại.");
+            throw new InvalidOperationException(ErrorMessages.ComputerCodeAlreadyExists);
         }
 
         var computer = new Computer
@@ -60,7 +61,7 @@ public class ComputerService : IComputerService
         var computer = await _computerRepository.GetByIdAsync(id);
         if (computer == null)
         {
-            throw new KeyNotFoundException("Máy tính không tồn tại.");
+            throw new KeyNotFoundException(ErrorMessages.ComputerNotFound);
         }
 
         computer.Name = request.Name;
@@ -98,4 +99,6 @@ public class ComputerService : IComputerService
         };
     }
 }
+
+
 

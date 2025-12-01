@@ -1,3 +1,4 @@
+using TeSystemBackend.Application.Constants;
 using TeSystemBackend.Application.DTOs.Users;
 using TeSystemBackend.Application.Repositories;
 using TeSystemBackend.Domain.Entities;
@@ -25,7 +26,7 @@ public class UserService : IUserService
         var user = await _userRepository.GetByIdAsync(id);
         if (user == null)
         {
-            throw new KeyNotFoundException("User not found.");
+            throw new KeyNotFoundException(ErrorMessages.UserNotFound);
         }
 
         return MapToDto(user);
@@ -36,7 +37,7 @@ public class UserService : IUserService
         var existing = await _userRepository.GetByEmailAsync(request.Email);
         if (existing != null)
         {
-            throw new InvalidOperationException("Email already exists.");
+            throw new InvalidOperationException(ErrorMessages.EmailAlreadyExists);
         }
 
         var user = new AppUser
@@ -56,7 +57,7 @@ public class UserService : IUserService
         var user = await _userRepository.GetByIdAsync(id);
         if (user == null)
         {
-            throw new KeyNotFoundException("User not found.");
+            throw new KeyNotFoundException(ErrorMessages.UserNotFound);
         }
 
         if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
@@ -64,7 +65,7 @@ public class UserService : IUserService
             var existing = await _userRepository.GetByEmailAsync(request.Email);
             if (existing != null && existing.Id != id)
             {
-                throw new InvalidOperationException("Email already exists.");
+                throw new InvalidOperationException(ErrorMessages.EmailAlreadyExists);
             }
         }
 
@@ -98,6 +99,8 @@ public class UserService : IUserService
         };
     }
 }
+
+
 
 
 

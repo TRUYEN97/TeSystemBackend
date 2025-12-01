@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using TeSystemBackend.API.Extensions;
 using TeSystemBackend.Application.DTOs;
 using TeSystemBackend.Application.DTOs.Computers;
 using TeSystemBackend.Application.Services;
@@ -41,11 +42,7 @@ public class ComputersController : ControllerBase
     [HttpPost]
     public async Task<ApiResponse<ComputerDto>> Create(CreateComputerDto request)
     {
-        var validationResult = await _createValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
-        {
-            throw new FluentValidation.ValidationException(validationResult.Errors);
-        }
+        await _createValidator.ValidateAndThrowAsync(request);
 
         var computer = await _computerService.CreateAsync(request);
         return ApiResponse<ComputerDto>.Success(computer);
@@ -54,11 +51,7 @@ public class ComputersController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<ApiResponse<ComputerDto>> Update(int id, UpdateComputerDto request)
     {
-        var validationResult = await _updateValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
-        {
-            throw new FluentValidation.ValidationException(validationResult.Errors);
-        }
+        await _updateValidator.ValidateAndThrowAsync(request);
 
         var computer = await _computerService.UpdateAsync(id, request);
         return ApiResponse<ComputerDto>.Success(computer);

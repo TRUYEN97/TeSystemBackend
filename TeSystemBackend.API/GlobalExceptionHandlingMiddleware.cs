@@ -1,3 +1,4 @@
+using TeSystemBackend.Application.Constants;
 using TeSystemBackend.Application.DTOs;
 
 namespace TeSystemBackend.API;
@@ -60,7 +61,7 @@ public class GlobalExceptionHandlingMiddleware
             }
             else
             {
-                message = "Validation failed";
+                message = ErrorMessages.ValidationFailed;
             }
 
             data = errors;
