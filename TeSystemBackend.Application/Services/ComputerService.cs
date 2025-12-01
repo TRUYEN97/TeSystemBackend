@@ -35,7 +35,7 @@ public class ComputerService : IComputerService
 
     public async Task<ComputerDto> CreateAsync(CreateComputerDto request)
     {
-        var existing = await _computerRepository.GetByCodeAsync(request.Code);
+        var existing = await _computerRepository.GetByIpAsync(request.IpAddress);
         if (existing != null)
         {
             throw new InvalidOperationException(ErrorMessages.ComputerCodeAlreadyExists);
@@ -43,7 +43,7 @@ public class ComputerService : IComputerService
 
         var computer = new Computer
         {
-            Code = request.Code,
+            IpAddress = request.IpAddress,
             Name = request.Name,
             LocationId = request.LocationId,
             Description = request.Description
@@ -92,7 +92,7 @@ public class ComputerService : IComputerService
         return new ComputerDto
         {
             Id = computer.Id,
-            Code = computer.Code,
+            IpAddress = computer.IpAddress,
             Name = computer.Name,
             LocationId = computer.LocationId,
             Description = computer.Description

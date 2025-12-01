@@ -21,11 +21,11 @@ public class ComputerRepository : IComputerRepository
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
-    public async Task<Computer?> GetByCodeAsync(string code)
+    public async Task<Computer?> GetByIpAsync(string ipAddress)
     {
         return await _context.Computers
             .Include(c => c.Location)
-            .FirstOrDefaultAsync(c => c.Code == code);
+            .FirstOrDefaultAsync(c => c.IpAddress == ipAddress);
     }
 
     public async Task<List<Computer>> GetAllAsync()

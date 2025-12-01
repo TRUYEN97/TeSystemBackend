@@ -7,7 +7,7 @@ public class CreateComputerDtoValidator : AbstractValidator<CreateComputerDto>
 {
     public CreateComputerDtoValidator()
     {
-        RuleFor(x => x.Code)
+        RuleFor(x => x.IpAddress)
             .NotEmpty().WithMessage("Computer code is required")
             .MaximumLength(100).WithMessage("Computer code must not exceed 100 characters");
 

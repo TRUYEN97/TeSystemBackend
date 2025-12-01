@@ -12,7 +12,7 @@ public class ComputerConfiguration : IEntityTypeConfiguration<Computer>
 
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.Code)
+        builder.Property(c => c.IpAddress)
             .IsRequired()
             .HasMaxLength(100);
 
@@ -23,7 +23,7 @@ public class ComputerConfiguration : IEntityTypeConfiguration<Computer>
         builder.Property(c => c.Description)
             .HasMaxLength(1000);
 
-        builder.HasIndex(c => c.Code)
+        builder.HasIndex(c => c.IpAddress)
             .IsUnique();
 
         builder.HasIndex(c => c.LocationId);

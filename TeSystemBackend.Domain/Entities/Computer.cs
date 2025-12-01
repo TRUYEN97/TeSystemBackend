@@ -3,7 +3,7 @@ namespace TeSystemBackend.Domain.Entities;
 public class Computer
 {
     public int Id { get; set; }
-    public string Code { get; set; } = string.Empty;
+    public string IpAddress { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public int LocationId { get; set; }
     public string? Description { get; set; }

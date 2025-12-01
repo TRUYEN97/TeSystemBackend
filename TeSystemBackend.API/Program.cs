@@ -16,7 +16,11 @@ using TeSystemBackend.Application.Services;
 using TeSystemBackend.Application.Validators.Auth;
 using TeSystemBackend.Application.Validators.Users;
 using TeSystemBackend.Application.Validators.Computers;
+using TeSystemBackend.Application.Validators.Departments;
+using TeSystemBackend.Application.Validators.Teams;
 using TeSystemBackend.Application.DTOs.Computers;
+using TeSystemBackend.Application.DTOs.Departments;
+using TeSystemBackend.Application.DTOs.Teams;
 using TeSystemBackend.Domain.Entities;
 using TeSystemBackend.Infrastructure.Data;
 
@@ -79,9 +83,13 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IComputerRepository, ComputerRepository>();
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            builder.Services.AddScoped<ITeamRepository, TeamRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IComputerService, ComputerService>();
+            builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+            builder.Services.AddScoped<ITeamService, TeamService>();
 
             builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
             builder.Services.AddScoped<IValidator<LoginRequest>, LoginRequestValidator>();
@@ -90,6 +98,10 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
             builder.Services.AddScoped<IValidator<CreateComputerDto>, CreateComputerDtoValidator>();
             builder.Services.AddScoped<IValidator<UpdateComputerDto>, UpdateComputerDtoValidator>();
+            builder.Services.AddScoped<IValidator<CreateDepartmentDto>, CreateDepartmentDtoValidator>();
+            builder.Services.AddScoped<IValidator<UpdateDepartmentDto>, UpdateDepartmentDtoValidator>();
+            builder.Services.AddScoped<IValidator<CreateTeamDto>, CreateTeamDtoValidator>();
+            builder.Services.AddScoped<IValidator<UpdateTeamDto>, UpdateTeamDtoValidator>();
 
             builder.Services.AddControllers()
                 .ConfigureApiBehaviorOptions(options =>
