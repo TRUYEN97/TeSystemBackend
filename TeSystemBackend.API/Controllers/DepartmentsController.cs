@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeSystemBackend.API.Extensions;
 using TeSystemBackend.Application.DTOs;
@@ -9,6 +10,7 @@ namespace TeSystemBackend.API.Controllers;
 
 [ApiController]
 [Route("api/departments")]
+[Authorize(Policy = "RequireAdmin")]
 public class DepartmentsController : ControllerBase
 {
     private readonly IDepartmentService _departmentService;

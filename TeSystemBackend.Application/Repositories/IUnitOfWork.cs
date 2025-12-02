@@ -6,6 +6,12 @@ public interface IUnitOfWork : IDisposable
     IRefreshTokenRepository RefreshTokens { get; }
     IDepartmentRepository Departments { get; }
     ITeamRepository Teams { get; }
+    IUserTeamRepository UserTeams { get; }
+    ITeamRoleLocationRepository TeamRoleLocations { get; }
+    IRoleRepository Roles { get; }
+    IPermissionRepository Permissions { get; }
+    IPerRoleRepository PerRoles { get; }
+    ILocationRepository Locations { get; }
 
     Task<int> SaveChangesAsync();
     Task BeginTransactionAsync();

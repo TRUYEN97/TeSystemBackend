@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using TeSystemBackend.Application.Repositories;
+using TeSystemBackend.Infrastructure.Repositories;
 
 namespace TeSystemBackend.Infrastructure.Data;
 
@@ -17,6 +18,12 @@ public class UnitOfWork : IUnitOfWork
     public IRefreshTokenRepository RefreshTokens => new RefreshTokenRepository(_context);
     public IDepartmentRepository Departments => new DepartmentRepository(_context);
     public ITeamRepository Teams => new TeamRepository(_context);
+    public IUserTeamRepository UserTeams => new UserTeamRepository(_context);
+    public ITeamRoleLocationRepository TeamRoleLocations => new TeamRoleLocationRepository(_context);
+    public IRoleRepository Roles => new RoleRepository(_context);
+    public IPermissionRepository Permissions => new PermissionRepository(_context);
+    public IPerRoleRepository PerRoles => new PerRoleRepository(_context);
+    public ILocationRepository Locations => new LocationRepository(_context);
 
     public async Task<int> SaveChangesAsync()
     {

@@ -5,7 +5,7 @@ namespace TeSystemBackend.Application.Repositories;
 public interface IComputerRepository
 {
     Task<Computer?> GetByIdAsync(int id);
-    Task<Computer?> GetByIpAsync(string code);
+    Task<Computer?> GetByIpAsync(string ipAddress);
     Task<List<Computer>> GetAllAsync();
     Task AddAsync(Computer computer);
     Task UpdateAsync(Computer computer);

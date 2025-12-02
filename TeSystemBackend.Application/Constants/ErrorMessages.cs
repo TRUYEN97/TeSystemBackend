@@ -11,6 +11,7 @@ public static class ErrorMessages
     public const string InvalidOrExpiredRefreshToken = "Invalid or expired refresh token";
     public const string ComputerNotFound = "Computer not found";
     public const string ComputerCodeAlreadyExists = "Computer code already exists";
+    public const string ComputerIpAlreadyExists = "Computer IP address already exists";
     public const string DepartmentNotFound = "Department not found";
     public const string DepartmentNameAlreadyExists = "Department name already exists";
     public const string TeamNotFound = "Team not found";
@@ -20,5 +21,11 @@ public static class ErrorMessages
     public const string JwtConfigurationMissing = "JWT configuration is missing 'Key'";
     public const string LoggedOut = "Logged out";
     public const string Success = "Success";
+    public const string RoleNotFound = "Role not found";
+    public const string LocationNotFound = "Location not found";
+    public const string UserAlreadyInTeam = "User already in team";
+    public const string TeamAlreadyHasRoleAtLocation = "Team already has this role at location";
+    public const string PermissionDenied = "You don't have permission to perform this action";
+    public const string UnauthorizedAccess = "Unauthorized access";
 }
 

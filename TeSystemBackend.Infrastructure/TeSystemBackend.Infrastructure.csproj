@@ -27,4 +27,8 @@
     <ProjectReference Include="..\TeSystemBackend.Domain\TeSystemBackend.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

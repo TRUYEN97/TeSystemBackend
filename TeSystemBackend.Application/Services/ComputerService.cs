@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using TeSystemBackend.Application.Constants;
 using TeSystemBackend.Application.DTOs.Computers;
 using TeSystemBackend.Application.Repositories;
@@ -9,21 +11,58 @@ public class ComputerService : IComputerService
 {
     private readonly IComputerRepository _computerRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAppAuthorizationService _authService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ComputerService(IComputerRepository computerRepository, IUnitOfWork unitOfWork)
+    public ComputerService(
+        IComputerRepository computerRepository,
+        IUnitOfWork unitOfWork,
+        IAppAuthorizationService authService,
+        IHttpContextAccessor httpContextAccessor)
     {
         _computerRepository = computerRepository;
         _unitOfWork = unitOfWork;
+        _authService = authService;
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    private int? GetCurrentUserId()
+    {
+        var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
+        return userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId) ? userId : null;
     }
 
     public async Task<List<ComputerDto>> GetAllAsync()
     {
+        var userId = GetCurrentUserId();
+        if (!userId.HasValue)
+            throw new UnauthorizedAccessException(ErrorMessages.UnauthorizedAccess);
+
         var computers = await _computerRepository.GetAllAsync();
-        return computers.Select(MapToDto).ToList();
+        
+        var filteredComputers = new List<Computer>();
+        foreach (var computer in computers)
+        {
+            if (await _authService.CanViewComputerAsync(userId.Value, computer.Id))
+            {
+                filteredComputers.Add(computer);
+            }
+        }
+
+        return filteredComputers.Select(MapToDto).ToList();
     }
 
     public async Task<ComputerDto> GetByIdAsync(int id)
     {
+        var userId = GetCurrentUserId();
+        if (!userId.HasValue)
+            throw new UnauthorizedAccessException(ErrorMessages.UnauthorizedAccess);
+
+        if (!await _authService.CanViewComputerAsync(userId.Value, id))
+        {
+            throw new UnauthorizedAccessException(ErrorMessages.PermissionDenied);
+        }
+
         var computer = await _computerRepository.GetByIdAsync(id);
         if (computer == null)
         {
@@ -35,10 +74,19 @@ public class ComputerService : IComputerService
 
     public async Task<ComputerDto> CreateAsync(CreateComputerDto request)
     {
+        var userId = GetCurrentUserId();
+        if (!userId.HasValue)
+            throw new UnauthorizedAccessException(ErrorMessages.UnauthorizedAccess);
+
+        if (!await _authService.CanCreateComputerAsync(userId.Value, request.LocationId))
+        {
+            throw new UnauthorizedAccessException(ErrorMessages.PermissionDenied);
+        }
+
         var existing = await _computerRepository.GetByIpAsync(request.IpAddress);
         if (existing != null)
         {
-            throw new InvalidOperationException(ErrorMessages.ComputerCodeAlreadyExists);
+            throw new InvalidOperationException(ErrorMessages.ComputerIpAlreadyExists);
         }
 
         var computer = new Computer
@@ -58,6 +106,15 @@ public class ComputerService : IComputerService
 
     public async Task<ComputerDto> UpdateAsync(int id, UpdateComputerDto request)
     {
+        var userId = GetCurrentUserId();
+        if (!userId.HasValue)
+            throw new UnauthorizedAccessException(ErrorMessages.UnauthorizedAccess);
+
+        if (!await _authService.CanUpdateComputerAsync(userId.Value, id))
+        {
+            throw new UnauthorizedAccessException(ErrorMessages.PermissionDenied);
+        }
+
         var computer = await _computerRepository.GetByIdAsync(id);
         if (computer == null)
         {
@@ -77,6 +134,15 @@ public class ComputerService : IComputerService
 
     public async Task DeleteAsync(int id)
     {
+        var userId = GetCurrentUserId();
+        if (!userId.HasValue)
+            throw new UnauthorizedAccessException(ErrorMessages.UnauthorizedAccess);
+
+        if (!await _authService.CanDeleteComputerAsync(userId.Value, id))
+        {
+            throw new UnauthorizedAccessException(ErrorMessages.PermissionDenied);
+        }
+
         var computer = await _computerRepository.GetByIdAsync(id);
         if (computer == null)
         {
@@ -99,6 +165,3 @@ public class ComputerService : IComputerService
         };
     }
 }
-
-
-

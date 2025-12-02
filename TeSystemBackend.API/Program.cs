@@ -28,7 +28,7 @@ namespace TeSystemBackend.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +85,13 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
             builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+            
+            builder.Services.AddScoped<IIdentityRoleService, IdentityRoleService>();
+            builder.Services.AddScoped<IUserTeamService, UserTeamService>();
+            builder.Services.AddScoped<ITeamRoleLocationService, TeamRoleLocationService>();
+            builder.Services.AddScoped<IAppAuthorizationService, AppAuthorizationService>();
+            builder.Services.AddScoped<IPermissionService, PermissionService>();
+            
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IComputerService, ComputerService>();
@@ -131,10 +138,31 @@ namespace TeSystemBackend.API
                         };
                     };
                 });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdmin", policy => 
+                    policy.RequireRole(Roles.Admin));
+            });
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                try
+                {
+                    var permissionService = scope.ServiceProvider.GetRequiredService<IPermissionService>();
+                    await permissionService.EnsureRolesAndPermissionsExistAsync();
+                }
+                catch (Exception ex)
+                {
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while initializing permissions and roles");
+                }
+            }
 
             if (app.Environment.IsDevelopment())
             {

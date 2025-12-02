@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeSystemBackend.API.Extensions;
 using TeSystemBackend.Application.DTOs;
@@ -9,6 +10,7 @@ namespace TeSystemBackend.API.Controllers;
 
 [ApiController]
 [Route("api/teams")]
+[Authorize]
 public class TeamsController : ControllerBase
 {
     private readonly ITeamService _teamService;
@@ -47,6 +49,7 @@ public class TeamsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "RequireAdmin")]
     public async Task<ApiResponse<TeamDto>> Create(CreateTeamDto request)
     {
         await _createValidator.ValidateAndThrowAsync(request);
@@ -56,6 +59,7 @@ public class TeamsController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Policy = "RequireAdmin")]
     public async Task<ApiResponse<TeamDto>> Update(int id, UpdateTeamDto request)
     {
         await _updateValidator.ValidateAndThrowAsync(request);
@@ -65,6 +69,7 @@ public class TeamsController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Policy = "RequireAdmin")]
     public async Task<ApiResponse<object>> Delete(int id)
     {
         await _teamService.DeleteAsync(id);

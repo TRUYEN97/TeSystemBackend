@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using TeSystemBackend.Application.Constants;
 using TeSystemBackend.Application.DTOs.Auth;
@@ -16,12 +17,21 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly JwtConfiguration _jwtConfig;
+    private readonly IIdentityRoleService _identityRoleService;
+    private readonly UserManager<AppUser> _userManager;
 
-    public AuthService(IUserRepository userRepository, IUnitOfWork unitOfWork, JwtConfiguration jwtConfig)
+    public AuthService(
+        IUserRepository userRepository, 
+        IUnitOfWork unitOfWork, 
+        JwtConfiguration jwtConfig,
+        IIdentityRoleService identityRoleService,
+        UserManager<AppUser> userManager)
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _jwtConfig = jwtConfig;
+        _identityRoleService = identityRoleService;
+        _userManager = userManager;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
@@ -47,7 +57,12 @@ public class AuthService : IAuthService
 
         var created = await _userRepository.CreateAsync(user, request.Password);
 
-        var token = GenerateJwtToken(created);
+        if (request.AssignAdminRole)
+        {
+            await _identityRoleService.AssignRoleToUserAsync(created.Id, Roles.Admin);
+        }
+
+        var token = await GenerateJwtTokenAsync(created);
         var refreshToken = await GenerateAndStoreRefreshTokenAsync(created);
 
         return new AuthResponse
@@ -75,7 +90,7 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException(ErrorMessages.InvalidPassword);
         }
 
-        var token = GenerateJwtToken(user);
+        var token = await GenerateJwtTokenAsync(user);
         var refreshToken = await GenerateAndStoreRefreshTokenAsync(user);
 
         return new AuthResponse
@@ -105,7 +120,7 @@ public class AuthService : IAuthService
         await _unitOfWork.RefreshTokens.UpdateAsync(existingToken);
         await _unitOfWork.SaveChangesAsync();
 
-        var newAccessToken = GenerateJwtToken(user);
+        var newAccessToken = await GenerateJwtTokenAsync(user);
 
         return new AuthResponse
         {
@@ -131,7 +146,7 @@ public class AuthService : IAuthService
         await _unitOfWork.SaveChangesAsync();
     }
 
-    private string GenerateJwtToken(AppUser user)
+    private async Task<string> GenerateJwtTokenAsync(AppUser user)
     {
         _jwtConfig.ValidateKey();
 
@@ -144,6 +159,12 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? string.Empty)
         };
+
+        var roles = await _identityRoleService.GetUserRolesAsync(user.Id);
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var token = new JwtSecurityToken(
             _jwtConfig.Issuer,
