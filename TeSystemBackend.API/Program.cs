@@ -91,6 +91,7 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<ITeamRoleLocationService, TeamRoleLocationService>();
             builder.Services.AddScoped<IAppAuthorizationService, AppAuthorizationService>();
             builder.Services.AddScoped<IPermissionService, PermissionService>();
+            builder.Services.AddScoped<IAdminSeedService, AdminSeedService>();
             
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserService, UserService>();
@@ -156,11 +157,14 @@ namespace TeSystemBackend.API
                 {
                     var permissionService = scope.ServiceProvider.GetRequiredService<IPermissionService>();
                     await permissionService.EnsureRolesAndPermissionsExistAsync();
+
+                    var adminSeedService = scope.ServiceProvider.GetRequiredService<IAdminSeedService>();
+                    await adminSeedService.EnsureAdminExistsAsync();
                 }
                 catch (Exception ex)
                 {
                     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while initializing permissions and roles");
+                    logger.LogError(ex, "An error occurred while initializing system");
                 }
             }
 

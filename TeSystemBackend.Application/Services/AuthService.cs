@@ -57,11 +57,6 @@ public class AuthService : IAuthService
 
         var created = await _userRepository.CreateAsync(user, request.Password);
 
-        if (request.AssignAdminRole)
-        {
-            await _identityRoleService.AssignRoleToUserAsync(created.Id, Roles.Admin);
-        }
-
         var token = await GenerateJwtTokenAsync(created);
         var refreshToken = await GenerateAndStoreRefreshTokenAsync(created);
 
