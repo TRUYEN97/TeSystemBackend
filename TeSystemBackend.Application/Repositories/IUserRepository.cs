@@ -12,6 +12,7 @@ public interface IUserRepository
     Task<AppUser> UpdateAsync(AppUser user);
     Task DeleteAsync(AppUser user);
     Task<AppUser?> GetByUserNameAsync(string userName);
+    Task ChangePasswordAsync(AppUser user, string currentPassword, string newPassword);
 }
 
 

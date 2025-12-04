@@ -99,9 +99,12 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IDepartmentService, DepartmentService>();
             builder.Services.AddScoped<ITeamService, TeamService>();
 
+            builder.Services.AddHttpContextAccessor();
+
             builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
             builder.Services.AddScoped<IValidator<LoginRequest>, LoginRequestValidator>();
             builder.Services.AddScoped<IValidator<RefreshTokenRequest>, RefreshTokenRequestValidator>();
+            builder.Services.AddScoped<IValidator<ChangePasswordRequest>, ChangePasswordRequestValidator>();
             builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
             builder.Services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
             builder.Services.AddScoped<IValidator<CreateComputerDto>, CreateComputerDtoValidator>();

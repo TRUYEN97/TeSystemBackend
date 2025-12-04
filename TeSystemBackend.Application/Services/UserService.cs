@@ -60,18 +60,22 @@ public class UserService : IUserService
             throw new KeyNotFoundException(ErrorMessages.UserNotFound);
         }
 
-        if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrEmpty(request.Email) && 
+            !string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase))
         {
             var existing = await _userRepository.GetByEmailAsync(request.Email);
             if (existing != null && existing.Id != id)
             {
                 throw new InvalidOperationException(ErrorMessages.EmailAlreadyExists);
             }
+            user.Email = request.Email;
+            user.UserName = request.Email;
         }
 
-        user.Name = request.Name;
-        user.Email = request.Email;
-        user.UserName = request.Email;
+        if (!string.IsNullOrEmpty(request.Name))
+        {
+            user.Name = request.Name;
+        }
 
         var updated = await _userRepository.UpdateAsync(user);
 

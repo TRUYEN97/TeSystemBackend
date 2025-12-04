@@ -8,12 +8,12 @@ public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
     public UpdateUserRequestValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty()
-            .MaximumLength(200);
+            .MaximumLength(200)
+            .When(x => !string.IsNullOrEmpty(x.Name));
 
         RuleFor(x => x.Email)
-            .NotEmpty()
-            .EmailAddress();
+            .EmailAddress()
+            .When(x => !string.IsNullOrEmpty(x.Email));
     }
 }
 

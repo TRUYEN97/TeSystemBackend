@@ -72,6 +72,16 @@ public class UserRepository : IUserRepository
     {
         return await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == userName);
     }
+
+    public async Task ChangePasswordAsync(AppUser user, string currentPassword, string newPassword)
+    {
+        var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(";", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException(errors);
+        }
+    }
 }
 
 

@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using TeSystemBackend.Application.Constants;
@@ -19,19 +20,22 @@ public class AuthService : IAuthService
     private readonly JwtConfiguration _jwtConfig;
     private readonly IIdentityRoleService _identityRoleService;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public AuthService(
         IUserRepository userRepository, 
         IUnitOfWork unitOfWork, 
         JwtConfiguration jwtConfig,
         IIdentityRoleService identityRoleService,
-        UserManager<AppUser> userManager)
+        UserManager<AppUser> userManager,
+        IHttpContextAccessor httpContextAccessor)
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _jwtConfig = jwtConfig;
         _identityRoleService = identityRoleService;
         _userManager = userManager;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
@@ -139,6 +143,36 @@ public class AuthService : IAuthService
         existingToken.RevokedAt = DateTime.UtcNow;
         await _unitOfWork.RefreshTokens.UpdateAsync(existingToken);
         await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task ChangePasswordAsync(int userId, ChangePasswordRequest request)
+    {
+        var currentUserId = GetCurrentUserId();
+        if (!currentUserId.HasValue || currentUserId.Value != userId)
+        {
+            throw new UnauthorizedAccessException(ErrorMessages.UnauthorizedAccess);
+        }
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            throw new KeyNotFoundException(ErrorMessages.UserNotFound);
+        }
+
+        var isValidPassword = await _userRepository.CheckPasswordAsync(user, request.CurrentPassword);
+        if (!isValidPassword)
+        {
+            throw new UnauthorizedAccessException(ErrorMessages.InvalidPassword);
+        }
+
+        await _userRepository.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+    }
+
+    private int? GetCurrentUserId()
+    {
+        var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier) 
+                         ?? _httpContextAccessor.HttpContext?.User?.FindFirst(JwtRegisteredClaimNames.Sub);
+        return userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId) ? userId : null;
     }
 
     private async Task<string> GenerateJwtTokenAsync(AppUser user)

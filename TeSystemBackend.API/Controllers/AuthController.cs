@@ -1,5 +1,7 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TeSystemBackend.API.Extensions;
 using TeSystemBackend.Application.Constants;
 using TeSystemBackend.Application.DTOs;
@@ -63,5 +65,25 @@ public class AuthController : ControllerBase
 
         await _authService.RevokeRefreshTokenAsync(request.RefreshToken);
         return ApiResponse<object>.Success(null!, ErrorMessages.LoggedOut);
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<ApiResponse<object>> ChangePassword(
+        [FromBody] ChangePasswordRequest request,
+        [FromServices] IValidator<ChangePasswordRequest> validator)
+    {
+        await validator.ValidateAndThrowAsync(request);
+
+        var userIdClaim = HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier)
+                         ?? HttpContext.User?.FindFirst("sub");
+        
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+        {
+            throw new UnauthorizedAccessException(ErrorMessages.UnauthorizedAccess);
+        }
+
+        await _authService.ChangePasswordAsync(userId, request);
+        return ApiResponse<object>.Success(null!, "Password changed successfully");
     }
 }
