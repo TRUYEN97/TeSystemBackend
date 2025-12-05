@@ -7,4 +7,5 @@ public interface IIdentityRoleService
     Task RemoveRoleFromUserAsync(int userId, string roleName);
     Task<bool> UserHasRoleAsync(int userId, string roleName);
     Task<List<string>> GetUserRolesAsync(int userId);
+    Task<int> GetUserCountByRoleAsync(string roleName);
 }

@@ -14,11 +14,16 @@ public class RolesController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPermissionService _permissionService;
+    private readonly IIdentityRoleService _identityRoleService;
 
-    public RolesController(IUnitOfWork unitOfWork, IPermissionService permissionService)
+    public RolesController(
+        IUnitOfWork unitOfWork, 
+        IPermissionService permissionService,
+        IIdentityRoleService identityRoleService)
     {
         _unitOfWork = unitOfWork;
         _permissionService = permissionService;
+        _identityRoleService = identityRoleService;
     }
 
     [HttpGet]
@@ -30,11 +35,13 @@ public class RolesController : ControllerBase
         foreach (var role in roles)
         {
             var permissions = await _permissionService.GetRolePermissionsAsync(role.Id);
+            var userCount = await _identityRoleService.GetUserCountByRoleAsync(role.Name);
             roleDtos.Add(new RoleDto
             {
                 Id = role.Id,
                 Name = role.Name,
-                Permissions = permissions
+                Permissions = permissions,
+                UserCount = userCount
             });
         }
 
@@ -52,11 +59,13 @@ public class RolesController : ControllerBase
         }
 
         var permissions = await _permissionService.GetRolePermissionsAsync(role.Id);
+        var userCount = await _identityRoleService.GetUserCountByRoleAsync(role.Name);
         var roleDto = new RoleDto
         {
             Id = role.Id,
             Name = role.Name,
-            Permissions = permissions
+            Permissions = permissions,
+            UserCount = userCount
         };
 
         return ApiResponse<RoleDto>.Success(roleDto);

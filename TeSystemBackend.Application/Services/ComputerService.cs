@@ -83,6 +83,12 @@ public class ComputerService : IComputerService
             throw new UnauthorizedAccessException(ErrorMessages.PermissionDenied);
         }
 
+        var location = await _unitOfWork.Locations.GetByIdAsync(request.LocationId);
+        if (location == null)
+        {
+            throw new KeyNotFoundException(ErrorMessages.LocationNotFound);
+        }
+
         var existing = await _computerRepository.GetByIpAsync(request.IpAddress);
         if (existing != null)
         {
@@ -119,6 +125,12 @@ public class ComputerService : IComputerService
         if (computer == null)
         {
             throw new KeyNotFoundException(ErrorMessages.ComputerNotFound);
+        }
+
+        var location = await _unitOfWork.Locations.GetByIdAsync(request.LocationId);
+        if (location == null)
+        {
+            throw new KeyNotFoundException(ErrorMessages.LocationNotFound);
         }
 
         computer.Name = request.Name;

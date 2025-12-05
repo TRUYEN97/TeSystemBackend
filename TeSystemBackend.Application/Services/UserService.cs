@@ -34,15 +34,21 @@ public class UserService : IUserService
 
     public async Task<UserDto> CreateAsync(CreateUserRequest request)
     {
-        var existing = await _userRepository.GetByEmailAsync(request.Email);
-        if (existing != null)
+        var existingEmail = await _userRepository.GetByEmailAsync(request.Email);
+        if (existingEmail != null)
         {
             throw new InvalidOperationException(ErrorMessages.EmailAlreadyExists);
         }
 
+        var existingUsername = await _userRepository.GetByUserNameAsync(request.Username);
+        if (existingUsername != null)
+        {
+            throw new InvalidOperationException(ErrorMessages.UsernameAlreadyExists);
+        }
+
         var user = new AppUser
         {
-            UserName = request.Email,
+            UserName = request.Username,
             Email = request.Email,
             Name = request.Name
         };

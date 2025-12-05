@@ -107,6 +107,7 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IValidator<ChangePasswordRequest>, ChangePasswordRequestValidator>();
             builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
             builder.Services.AddScoped<IValidator<UpdateUserRequest>, UpdateUserRequestValidator>();
+            builder.Services.AddScoped<IValidator<AssignRoleRequest>, AssignRoleRequestValidator>();
             builder.Services.AddScoped<IValidator<CreateComputerDto>, CreateComputerDtoValidator>();
             builder.Services.AddScoped<IValidator<UpdateComputerDto>, UpdateComputerDtoValidator>();
             builder.Services.AddScoped<IValidator<CreateDepartmentDto>, CreateDepartmentDtoValidator>();

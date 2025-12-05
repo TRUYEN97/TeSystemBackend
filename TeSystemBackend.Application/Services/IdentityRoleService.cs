@@ -67,4 +67,21 @@ public class IdentityRoleService : IIdentityRoleService
         var roles = await _userManager.GetRolesAsync(user);
         return roles.ToList();
     }
+
+    public async Task<int> GetUserCountByRoleAsync(string roleName)
+    {
+        if (!await _roleManager.RoleExistsAsync(roleName))
+        {
+            return 0;
+        }
+
+        var role = await _roleManager.FindByNameAsync(roleName);
+        if (role == null)
+        {
+            return 0;
+        }
+
+        var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
+        return usersInRole.Count;
+    }
 }

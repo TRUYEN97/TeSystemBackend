@@ -1,6 +1,8 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeSystemBackend.API.Extensions;
+using TeSystemBackend.Application.Constants;
 using TeSystemBackend.Application.DTOs;
 using TeSystemBackend.Application.DTOs.Users;
 using TeSystemBackend.Application.Services;
@@ -12,17 +14,23 @@ namespace TeSystemBackend.API.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IIdentityRoleService _identityRoleService;
     private readonly IValidator<CreateUserRequest> _createValidator;
     private readonly IValidator<UpdateUserRequest> _updateValidator;
+    private readonly IValidator<AssignRoleRequest> _assignRoleValidator;
 
     public UsersController(
         IUserService userService,
+        IIdentityRoleService identityRoleService,
         IValidator<CreateUserRequest> createValidator,
-        IValidator<UpdateUserRequest> updateValidator)
+        IValidator<UpdateUserRequest> updateValidator,
+        IValidator<AssignRoleRequest> assignRoleValidator)
     {
         _userService = userService;
+        _identityRoleService = identityRoleService;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
+        _assignRoleValidator = assignRoleValidator;
     }
 
     [HttpGet]
@@ -62,6 +70,16 @@ public class UsersController : ControllerBase
     {
         await _userService.DeleteAsync(id);
         return ApiResponse<object>.Success(null!);
+    }
+
+    [HttpPost("assign-role")]
+    [Authorize(Policy = "RequireAdmin")]
+    public async Task<ApiResponse<object>> AssignRole(AssignRoleRequest request)
+    {
+        await _assignRoleValidator.ValidateAndThrowAsync(request);
+
+        await _identityRoleService.AssignRoleToUserAsync(request.UserId, request.RoleName);
+        return ApiResponse<object>.Success(null!, ErrorMessages.Success);
     }
 }
 

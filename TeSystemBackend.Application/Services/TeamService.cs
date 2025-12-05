@@ -10,21 +10,32 @@ public class TeamService : ITeamService
     private readonly ITeamRepository _teamRepository;
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserTeamService _userTeamService;
 
     public TeamService(
         ITeamRepository teamRepository,
         IDepartmentRepository departmentRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IUserTeamService userTeamService)
     {
         _teamRepository = teamRepository;
         _departmentRepository = departmentRepository;
         _unitOfWork = unitOfWork;
+        _userTeamService = userTeamService;
     }
 
     public async Task<List<TeamDto>> GetAllAsync()
     {
         var teams = await _teamRepository.GetAllAsync();
-        return teams.Select(MapToDto).ToList();
+        var teamDtos = new List<TeamDto>();
+        
+        foreach (var team in teams)
+        {
+            var memberCount = await GetTeamMemberCountAsync(team.Id);
+            teamDtos.Add(MapToDto(team, memberCount));
+        }
+        
+        return teamDtos;
     }
 
     public async Task<TeamDto> GetByIdAsync(int id)
@@ -35,7 +46,8 @@ public class TeamService : ITeamService
             throw new KeyNotFoundException(ErrorMessages.TeamNotFound);
         }
 
-        return MapToDto(team);
+        var memberCount = await GetTeamMemberCountAsync(team.Id);
+        return MapToDto(team, memberCount);
     }
 
     public async Task<List<TeamDto>> GetByDepartmentIdAsync(int departmentId)
@@ -47,7 +59,15 @@ public class TeamService : ITeamService
         }
 
         var teams = await _teamRepository.GetByDepartmentIdAsync(departmentId);
-        return teams.Select(MapToDto).ToList();
+        var teamDtos = new List<TeamDto>();
+        
+        foreach (var team in teams)
+        {
+            var memberCount = await GetTeamMemberCountAsync(team.Id);
+            teamDtos.Add(MapToDto(team, memberCount));
+        }
+        
+        return teamDtos;
     }
 
     public async Task<TeamDto> CreateAsync(CreateTeamDto request)
@@ -75,7 +95,8 @@ public class TeamService : ITeamService
         await _unitOfWork.SaveChangesAsync();
 
         var created = await _teamRepository.GetByIdAsync(team.Id);
-        return MapToDto(created!);
+        var memberCount = await GetTeamMemberCountAsync(created!.Id);
+        return MapToDto(created, memberCount);
     }
 
     public async Task<TeamDto> UpdateAsync(int id, UpdateTeamDto request)
@@ -109,7 +130,8 @@ public class TeamService : ITeamService
         await _unitOfWork.SaveChangesAsync();
 
         var updated = await _teamRepository.GetByIdAsync(id);
-        return MapToDto(updated!);
+        var memberCount = await GetTeamMemberCountAsync(updated!.Id);
+        return MapToDto(updated, memberCount);
     }
 
     public async Task DeleteAsync(int id)
@@ -124,14 +146,21 @@ public class TeamService : ITeamService
         await _unitOfWork.SaveChangesAsync();
     }
 
-    private static TeamDto MapToDto(Team team)
+    private async Task<int> GetTeamMemberCountAsync(int teamId)
+    {
+        var userIds = await _userTeamService.GetTeamUserIdsAsync(teamId);
+        return userIds.Count;
+    }
+
+    private static TeamDto MapToDto(Team team, int memberCount)
     {
         return new TeamDto
         {
             Id = team.Id,
             DepartmentId = team.DepartmentId,
             Name = team.Name,
-            FullName = team.FullName
+            FullName = team.FullName,
+            MemberCount = memberCount
         };
     }
 }
