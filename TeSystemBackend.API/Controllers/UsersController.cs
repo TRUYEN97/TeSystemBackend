@@ -11,6 +11,7 @@ namespace TeSystemBackend.API.Controllers;
 
 [ApiController]
 [Route("api/users")]
+[Authorize]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -48,6 +49,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "RequireAdmin")]
     public async Task<ApiResponse<UserDto>> Create(CreateUserRequest request)
     {
         await _createValidator.ValidateAndThrowAsync(request);
@@ -57,6 +59,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Policy = "RequireAdmin")]
     public async Task<ApiResponse<UserDto>> Update(int id, UpdateUserRequest request)
     {
         await _updateValidator.ValidateAndThrowAsync(request);
@@ -66,6 +69,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Policy = "RequireAdmin")]
     public async Task<ApiResponse<object>> Delete(int id)
     {
         await _userService.DeleteAsync(id);

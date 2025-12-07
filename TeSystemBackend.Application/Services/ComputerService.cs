@@ -49,6 +49,11 @@ public class ComputerService : IComputerService
             }
         }
 
+        if (filteredComputers.Count == 0 && computers.Count > 0)
+        {
+            throw new UnauthorizedAccessException(ErrorMessages.PermissionDenied);
+        }
+
         return filteredComputers.Select(MapToDto).ToList();
     }
 

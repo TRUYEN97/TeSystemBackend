@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeSystemBackend.Application.Constants;
 using TeSystemBackend.Application.DTOs;
 using TeSystemBackend.Application.DTOs.Roles;
 using TeSystemBackend.Application.Repositories;
@@ -55,7 +56,7 @@ public class RolesController : ControllerBase
 
         if (role == null)
         {
-            throw new KeyNotFoundException("Role not found");
+            throw new KeyNotFoundException(ErrorMessages.RoleNotFound);
         }
 
         var permissions = await _permissionService.GetRolePermissionsAsync(role.Id);
