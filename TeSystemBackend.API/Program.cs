@@ -98,6 +98,14 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IComputerService, ComputerService>();
             builder.Services.AddScoped<IDepartmentService, DepartmentService>();
             builder.Services.AddScoped<ITeamService, TeamService>();
+            
+            builder.Services.AddScoped<ComputerLocationResourceProvider>();
+            builder.Services.AddSingleton<ILocationResourceProviderFactory>(sp =>
+            {
+                var computerProvider = sp.GetRequiredService<ComputerLocationResourceProvider>();
+                return new LocationResourceProviderFactory(computerProvider);
+            });
+            builder.Services.AddScoped<ILocationStatisticsService, LocationStatisticsService>();
 
             builder.Services.AddHttpContextAccessor();
 
