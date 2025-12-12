@@ -28,5 +28,6 @@ public static class ErrorMessages
     public const string TeamAlreadyHasRoleAtLocation = "Team already has this role at location";
     public const string PermissionDenied = "You don't have permission to perform this action";
     public const string UnauthorizedAccess = "Unauthorized access";
+    public const string ReportNotFound = "Report not found";
 }
 

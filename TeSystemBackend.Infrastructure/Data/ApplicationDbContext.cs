@@ -21,6 +21,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole<int>
     public DbSet<PerRole> PerRoles { get; set; }
     public DbSet<Location> Locations { get; set; }
     public DbSet<TeamRoleLocation> TeamRoleLocations { get; set; }
+    public DbSet<Report> Reports { get; set; }
     public DbSet<AclClass> AclClasses { get; set; }
     public DbSet<AclObjectIdentity> AclObjectIdentities { get; set; }
     public DbSet<AclSid> AclSids { get; set; }

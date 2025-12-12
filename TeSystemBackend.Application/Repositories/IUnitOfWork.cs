@@ -12,6 +12,7 @@ public interface IUnitOfWork : IDisposable
     IPermissionRepository Permissions { get; }
     IPerRoleRepository PerRoles { get; }
     ILocationRepository Locations { get; }
+    IReportRepository Reports { get; }
 
     Task<int> SaveChangesAsync();
     Task BeginTransactionAsync();
