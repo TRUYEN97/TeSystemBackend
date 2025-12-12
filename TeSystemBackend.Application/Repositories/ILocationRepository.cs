@@ -7,4 +7,7 @@ public interface ILocationRepository
     Task<Location?> GetByIdAsync(int id);
     Task<Location?> GetByNameAsync(string name);
     Task<List<Location>> GetAllAsync();
+    Task AddAsync(Location location);
+    Task UpdateAsync(Location location);
+    Task DeleteAsync(Location location);
 }

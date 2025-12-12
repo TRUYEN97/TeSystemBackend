@@ -85,6 +85,19 @@ public class UsersController : ControllerBase
         await _identityRoleService.AssignRoleToUserAsync(request.UserId, request.RoleName);
         return ApiResponse<object>.Success(null!, ErrorMessages.Success);
     }
+
+    [HttpGet("{id:int}/roles")]
+    public async Task<ApiResponse<List<string>>> GetUserRoles(int id)
+    {
+        var user = await _userService.GetByIdAsync(id);
+        if (user == null)
+        {
+            throw new KeyNotFoundException(ErrorMessages.UserNotFound);
+        }
+
+        var roles = await _identityRoleService.GetUserRolesAsync(id);
+        return ApiResponse<List<string>>.Success(roles);
+    }
 }
 
 

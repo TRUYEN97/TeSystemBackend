@@ -23,6 +23,7 @@ public static class ErrorMessages
     public const string Success = "Success";
     public const string RoleNotFound = "Role not found";
     public const string LocationNotFound = "Location not found";
+    public const string LocationNameAlreadyExists = "Location name already exists";
     public const string UserAlreadyInTeam = "User already in team";
     public const string TeamAlreadyHasRoleAtLocation = "Team already has this role at location";
     public const string PermissionDenied = "You don't have permission to perform this action";
