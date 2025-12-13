@@ -2,6 +2,7 @@ using TeSystemBackend.Application.Constants;
 using TeSystemBackend.Application.DTOs.Users;
 using TeSystemBackend.Application.Repositories;
 using TeSystemBackend.Domain.Entities;
+using TeSystemBackend.Application.DTOs.Teams;
 
 namespace TeSystemBackend.Application.Services;
 
@@ -105,7 +106,15 @@ public class UserService : IUserService
         {
             Id = user.Id,
             Email = user.Email ?? string.Empty,
-            Name = user.Name
+            Name = user.Name,
+            Teams = user.UserTeams.Select(ut => new TeamDto
+            {
+                Id = ut.Team.Id,
+                DepartmentId = ut.Team.DepartmentId,
+                Name = ut.Team.Name,
+                FullName = ut.Team.FullName,
+                MemberCount = 0
+            }).ToList()
         };
     }
 }

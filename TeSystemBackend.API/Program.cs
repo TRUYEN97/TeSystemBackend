@@ -50,7 +50,7 @@ namespace TeSystemBackend.API
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 6;
-                options.User.RequireUniqueEmail = true;
+                //options.User.RequireUniqueEmail = true;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
@@ -100,7 +100,7 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<ITeamService, TeamService>();
             
             builder.Services.AddScoped<ComputerLocationResourceProvider>();
-            builder.Services.AddSingleton<ILocationResourceProviderFactory>(sp =>
+            builder.Services.AddScoped<ILocationResourceProviderFactory>(sp =>
             {
                 var computerProvider = sp.GetRequiredService<ComputerLocationResourceProvider>();
                 return new LocationResourceProviderFactory(computerProvider);
@@ -158,6 +158,18 @@ namespace TeSystemBackend.API
                     policy.RequireRole(Roles.Admin));
             });
 
+            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: "_myAllowSpecificOrigins",
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin() 
+                              .AllowAnyHeader() 
+                              .AllowAnyMethod(); 
+                    });
+            });
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -187,6 +199,7 @@ namespace TeSystemBackend.API
             }
 
             app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.UseHttpsRedirection();
 

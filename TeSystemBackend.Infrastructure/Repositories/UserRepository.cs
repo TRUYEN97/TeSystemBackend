@@ -43,7 +43,10 @@ public class UserRepository : IUserRepository
 
     public async Task<List<AppUser>> GetAllAsync()
     {
-        return await _userManager.Users.ToListAsync();
+        return await _userManager.Users
+            .Include(u => u.UserTeams)
+            .ThenInclude(ut => ut.Team)
+            .ToListAsync();
     }
 
     public async Task<AppUser> UpdateAsync(AppUser user)
