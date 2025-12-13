@@ -34,4 +34,21 @@ public class LocationRepository : ILocationRepository
             .Include(l => l.Parent)
             .ToListAsync();
     }
+
+    public async Task AddAsync(Location location)
+    {
+        await _context.Locations.AddAsync(location);
+    }
+
+    public Task UpdateAsync(Location location)
+    {
+        _context.Locations.Update(location);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Location location)
+    {
+        _context.Locations.Remove(location);
+        return Task.CompletedTask;
+    }
 }

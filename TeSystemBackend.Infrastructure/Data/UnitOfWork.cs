@@ -24,6 +24,7 @@ public class UnitOfWork : IUnitOfWork
     public IPermissionRepository Permissions => new PermissionRepository(_context);
     public IPerRoleRepository PerRoles => new PerRoleRepository(_context);
     public ILocationRepository Locations => new LocationRepository(_context);
+    public IReportRepository Reports => new ReportRepository(_context);
 
     public async Task<int> SaveChangesAsync()
     {

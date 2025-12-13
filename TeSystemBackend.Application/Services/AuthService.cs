@@ -40,10 +40,14 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        var existingEmail = await _userRepository.GetByEmailAsync(request.Email);
-        if (existingEmail != null)
+        // Check email uniqueness only if email is provided
+        if (!string.IsNullOrEmpty(request.Email))
         {
-            throw new InvalidOperationException(ErrorMessages.EmailAlreadyExists);
+            var existingEmail = await _userRepository.GetByEmailAsync(request.Email);
+            if (existingEmail != null)
+            {
+                throw new InvalidOperationException(ErrorMessages.EmailAlreadyExists);
+            }
         }
 
         var existingUserName = await _userRepository.GetByUserNameAsync(request.Username);

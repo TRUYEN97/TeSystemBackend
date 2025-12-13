@@ -18,9 +18,14 @@ using TeSystemBackend.Application.Validators.Users;
 using TeSystemBackend.Application.Validators.Computers;
 using TeSystemBackend.Application.Validators.Departments;
 using TeSystemBackend.Application.Validators.Teams;
+using TeSystemBackend.Application.Validators.Locations;
+using TeSystemBackend.Application.Validators.Reports;
 using TeSystemBackend.Application.DTOs.Computers;
 using TeSystemBackend.Application.DTOs.Departments;
 using TeSystemBackend.Application.DTOs.Teams;
+using TeSystemBackend.Application.DTOs.Locations;
+using TeSystemBackend.Application.DTOs.Reports;
+using TeSystemBackend.Infrastructure.Repositories;
 using TeSystemBackend.Domain.Entities;
 using TeSystemBackend.Infrastructure.Data;
 
@@ -50,7 +55,10 @@ namespace TeSystemBackend.API
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 6;
-                //options.User.RequireUniqueEmail = true;
+
+
+                options.User.RequireUniqueEmail = false;
+
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
@@ -85,6 +93,8 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
             builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+            builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+            builder.Services.AddScoped<IReportRepository, ReportRepository>();
             
             builder.Services.AddScoped<IIdentityRoleService, IdentityRoleService>();
             builder.Services.AddScoped<IUserTeamService, UserTeamService>();
@@ -98,6 +108,8 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IComputerService, ComputerService>();
             builder.Services.AddScoped<IDepartmentService, DepartmentService>();
             builder.Services.AddScoped<ITeamService, TeamService>();
+            builder.Services.AddScoped<ILocationService, LocationService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
             
             builder.Services.AddScoped<ComputerLocationResourceProvider>();
             builder.Services.AddScoped<ILocationResourceProviderFactory>(sp =>
@@ -122,6 +134,10 @@ namespace TeSystemBackend.API
             builder.Services.AddScoped<IValidator<UpdateDepartmentDto>, UpdateDepartmentDtoValidator>();
             builder.Services.AddScoped<IValidator<CreateTeamDto>, CreateTeamDtoValidator>();
             builder.Services.AddScoped<IValidator<UpdateTeamDto>, UpdateTeamDtoValidator>();
+            builder.Services.AddScoped<IValidator<CreateLocationDto>, CreateLocationDtoValidator>();
+            builder.Services.AddScoped<IValidator<CreateReportDto>, CreateReportDtoValidator>();
+            builder.Services.AddScoped<IValidator<UpdateReportDto>, UpdateReportDtoValidator>();
+            builder.Services.AddScoped<IValidator<ChangeReportStatusRequest>, ChangeReportStatusRequestValidator>();
 
             builder.Services.AddControllers()
                 .ConfigureApiBehaviorOptions(options =>

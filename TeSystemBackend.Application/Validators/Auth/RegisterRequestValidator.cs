@@ -8,20 +8,20 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
     public RegisterRequestValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("Tên không được để trống")
-            .MaximumLength(100).WithMessage("Tên không được dài quá 100 ký tự");
+            .NotEmpty().WithMessage("Name is required")
+            .MaximumLength(100).WithMessage("Name must not exceed 100 characters");
 
         RuleFor(x => x.Username)
-            .NotEmpty().WithMessage("Username không được để trống")
-            .MaximumLength(100).WithMessage("Username không được dài quá 100 ký tự");
+            .NotEmpty().WithMessage("Username is required")
+            .MaximumLength(100).WithMessage("Username must not exceed 100 characters");
 
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("Email không được để trống")
-            .EmailAddress().WithMessage("Email không hợp lệ");
+            .EmailAddress().WithMessage("Email is invalid")
+            .When(x => !string.IsNullOrEmpty(x.Email));
 
         RuleFor(x => x.Password)
-            .NotEmpty().WithMessage("Password không được để trống")
-            .MinimumLength(6).WithMessage("Password phải có ít nhất 6 ký tự");
+            .NotEmpty().WithMessage("Password is required")
+            .MinimumLength(6).WithMessage("Password must be at least 6 characters");
     }
 }
 
