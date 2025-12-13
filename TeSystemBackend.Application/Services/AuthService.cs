@@ -203,7 +203,7 @@ public class AuthService : IAuthService
             _jwtConfig.Issuer,
             _jwtConfig.Audience,
             claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: DateTime.UtcNow.AddHours(3),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

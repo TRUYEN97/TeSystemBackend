@@ -21,7 +21,10 @@ public class UserRepository : IUserRepository
 
     public async Task<AppUser?> GetByIdAsync(int id)
     {
-        return await _userManager.Users.FirstOrDefaultAsync(u => u.Id == id);
+        return await _userManager.Users
+            .Include(u => u.UserTeams)
+            .ThenInclude(ut => ut.Team)
+            .FirstOrDefaultAsync(u => u.Id == id);
     }
 
     public async Task<AppUser> CreateAsync(AppUser user, string password)
