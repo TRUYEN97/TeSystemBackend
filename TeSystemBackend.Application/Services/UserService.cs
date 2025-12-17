@@ -9,10 +9,12 @@ namespace TeSystemBackend.Application.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<List<UserDto>> GetAllAsync()
@@ -54,9 +56,25 @@ public class UserService : IUserService
             Name = request.Name
         };
 
-        var created = await _userRepository.CreateAsync(user, request.Password);
+        var newUser = await _userRepository.CreateAsync(user, request.Password);
 
-        return MapToDto(created);
+        if (request.Teams.Count > 0)
+        {
+            foreach (int teamId in request.Teams)
+            {
+                var userTeam = new UserTeam
+                {
+                    TeamId = teamId,
+                    UserId = newUser.Id
+                };
+                await _unitOfWork.UserTeams.AddAsync(userTeam);
+            }
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        var newUpdatedUser = await _userRepository.GetByIdAsync(newUser.Id);
+
+        return MapToDto(newUpdatedUser);
     }
 
     public async Task<UserDto> UpdateAsync(int id, UpdateUserRequest request)
