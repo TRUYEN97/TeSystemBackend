@@ -129,8 +129,8 @@ public class UserService : IUserService
             {
                 Id = ut.Team.Id,
                 DepartmentId = ut.Team.DepartmentId,
-                Name = ut.Team.Name,
-                FullName = ut.Team.FullName,
+                DepartmentName = ut.Team.Department.Name,
+                Name = $"{ut.Team.Department.Name}_{ut.Team.Name}",
                 MemberCount = 0
             }).ToList()
         };

@@ -24,6 +24,7 @@ public class UserRepository : IUserRepository
         return await _userManager.Users
             .Include(u => u.UserTeams)
             .ThenInclude(ut => ut.Team)
+            .ThenInclude(team => team.Department)
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 
@@ -49,6 +50,7 @@ public class UserRepository : IUserRepository
         return await _userManager.Users
             .Include(u => u.UserTeams)
             .ThenInclude(ut => ut.Team)
+            .ThenInclude(team => team.Department)
             .ToListAsync();
     }
 

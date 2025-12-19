@@ -158,8 +158,8 @@ public class TeamService : ITeamService
         {
             Id = team.Id,
             DepartmentId = team.DepartmentId,
-            Name = team.Name,
-            FullName = team.FullName,
+            DepartmentName = team.Department.Name,
+            Name = $"{team.Department.Name}_{team.Name}",
             MemberCount = memberCount
         };
     }
