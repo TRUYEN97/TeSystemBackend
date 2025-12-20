@@ -23,7 +23,8 @@ namespace TeSystemBackend.Infrastructure.Migrations
                 name: "FullName",
                 table: "Teams",
                 type: "varchar(400)",
-                nullable: false
+                nullable: false,
+                defaultValue: string.Empty
                 ).Annotation("MySql:CharSet", "utf8mb4");
         }
     }

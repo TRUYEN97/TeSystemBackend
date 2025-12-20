@@ -31,6 +31,7 @@ public class TeamRepository : ITeamRepository
     {
         return await _context.Teams
             .Include(t => t.Department)
+            .OrderBy(t => t.Id)
             .ToListAsync();
     }
 

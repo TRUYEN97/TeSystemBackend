@@ -47,7 +47,7 @@ public class TeamService : ITeamService
         }
 
         var memberCount = await GetTeamMemberCountAsync(team.Id);
-        return MapToDto(team, memberCount);
+        return MapToDtoIgnoreDepartmentName(team, memberCount);
     }
 
     public async Task<List<TeamDto>> GetByDepartmentIdAsync(int departmentId)
@@ -106,13 +106,6 @@ public class TeamService : ITeamService
             throw new KeyNotFoundException(ErrorMessages.TeamNotFound);
         }
 
-        var department = await _departmentRepository.GetByIdAsync(request.DepartmentId);
-        if (department == null)
-        {
-            throw new KeyNotFoundException(ErrorMessages.DepartmentNotFound);
-        }
-
-        team.DepartmentId = request.DepartmentId;
         team.Name = request.Name;
 
         await _teamRepository.UpdateAsync(team);
@@ -120,7 +113,7 @@ public class TeamService : ITeamService
 
         var updated = await _teamRepository.GetByIdAsync(id);
         var memberCount = await GetTeamMemberCountAsync(updated!.Id);
-        return MapToDto(updated, memberCount);
+        return MapToDtoIgnoreDepartmentName(updated, memberCount);
     }
 
     public async Task DeleteAsync(int id)
@@ -149,6 +142,18 @@ public class TeamService : ITeamService
             DepartmentId = team.DepartmentId,
             DepartmentName = team.Department.Name,
             Name = $"{team.Department.Name}_{team.Name}",
+            MemberCount = memberCount
+        };
+    }
+
+    private static TeamDto MapToDtoIgnoreDepartmentName(Team team, int memberCount)
+    {
+        return new TeamDto
+        {
+            Id = team.Id,
+            DepartmentId = team.DepartmentId,
+            DepartmentName = team.Department.Name,
+            Name = team.Name,
             MemberCount = memberCount
         };
     }
