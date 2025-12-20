@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace TeSystemBackend.Domain.Entities;
 
 public class Team
@@ -5,6 +7,7 @@ public class Team
     public int Id { get; set; }
     public int DepartmentId { get; set; }
     public string Name { get; set; } = string.Empty;
+    //public string OldColumn { get; set; }
     public string FullName { get; set; } = string.Empty;
 
     public virtual Department Department { get; set; } = null!;

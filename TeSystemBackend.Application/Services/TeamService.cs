@@ -78,17 +78,17 @@ public class TeamService : ITeamService
             throw new KeyNotFoundException(ErrorMessages.DepartmentNotFound);
         }
 
-        var existing = await _teamRepository.GetByFullNameAsync(request.FullName);
+        var existing = await _teamRepository.GetByNameAndDepartmentId(request.DepartmentId, request.Name);
         if (existing != null)
         {
-            throw new InvalidOperationException(ErrorMessages.TeamFullNameAlreadyExists);
+            throw new InvalidOperationException(ErrorMessages.TeamAlreadyExists);
         }
 
         var team = new Team
         {
             DepartmentId = request.DepartmentId,
             Name = request.Name,
-            FullName = request.FullName
+            FullName = ""
         };
 
         await _teamRepository.AddAsync(team);

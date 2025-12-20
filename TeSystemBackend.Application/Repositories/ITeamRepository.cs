@@ -6,6 +6,7 @@ public interface ITeamRepository
 {
     Task<Team?> GetByIdAsync(int id);
     Task<Team?> GetByFullNameAsync(string fullName);
+    Task<Team?> GetByNameAndDepartmentId(int departmentId, string name);
     Task<List<Team>> GetAllAsync();
     Task<List<Team>> GetByDepartmentIdAsync(int departmentId);
     Task AddAsync(Team team);

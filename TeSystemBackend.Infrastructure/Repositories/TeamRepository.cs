@@ -28,6 +28,12 @@ public class TeamRepository : ITeamRepository
             .FirstOrDefaultAsync(t => t.FullName == fullName);
     }
 
+    public async Task<Team?> GetByNameAndDepartmentId(int departmentId, string name)
+    {
+        return await _context.Teams
+            .FirstOrDefaultAsync(t => t.Name.ToLower() == name.ToLower() && t.DepartmentId == departmentId);
+    }
+
     public async Task<List<Team>> GetAllAsync()
     {
         return await _context.Teams

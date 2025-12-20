@@ -16,6 +16,7 @@ public static class ErrorMessages
     public const string DepartmentNameAlreadyExists = "Department name already exists";
     public const string TeamNotFound = "Team not found";
     public const string TeamFullNameAlreadyExists = "Team full name already exists";
+    public const string TeamAlreadyExists = "Team already exists";
     public const string ConnectionStringNotFound = "Connection string 'DefaultConnection' not found";
     public const string JwtKeyNotConfigured = "JWT key is not configured";
     public const string JwtConfigurationMissing = "JWT configuration is missing 'Key'";

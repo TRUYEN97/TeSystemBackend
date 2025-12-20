@@ -31,9 +31,6 @@ artifacts/
 wwwroot/dist/
 wwwroot/node_modules/
 
-## Entity Framework Migrations metadata
-**/Migrations/*Designer.cs
-**/Migrations/*Snapshot.cs
 
 ## Logs
 *.log
