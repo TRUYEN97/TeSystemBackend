@@ -88,7 +88,6 @@ public class TeamService : ITeamService
         {
             DepartmentId = request.DepartmentId,
             Name = request.Name,
-            FullName = ""
         };
 
         await _teamRepository.AddAsync(team);
@@ -113,18 +112,8 @@ public class TeamService : ITeamService
             throw new KeyNotFoundException(ErrorMessages.DepartmentNotFound);
         }
 
-        if (!string.Equals(team.FullName, request.FullName, StringComparison.OrdinalIgnoreCase))
-        {
-            var existing = await _teamRepository.GetByFullNameAsync(request.FullName);
-            if (existing != null && existing.Id != id)
-            {
-                throw new InvalidOperationException(ErrorMessages.TeamFullNameAlreadyExists);
-            }
-        }
-
         team.DepartmentId = request.DepartmentId;
         team.Name = request.Name;
-        team.FullName = request.FullName;
 
         await _teamRepository.UpdateAsync(team);
         await _unitOfWork.SaveChangesAsync();

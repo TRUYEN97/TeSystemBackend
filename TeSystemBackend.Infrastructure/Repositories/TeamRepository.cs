@@ -21,13 +21,6 @@ public class TeamRepository : ITeamRepository
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 
-    public async Task<Team?> GetByFullNameAsync(string fullName)
-    {
-        return await _context.Teams
-            .Include(t => t.Department)
-            .FirstOrDefaultAsync(t => t.FullName == fullName);
-    }
-
     public async Task<Team?> GetByNameAndDepartmentId(int departmentId, string name)
     {
         return await _context.Teams

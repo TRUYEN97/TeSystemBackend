@@ -19,14 +19,7 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(t => t.FullName)
-            .IsRequired()
-            .HasMaxLength(400);
-
         builder.HasIndex(t => new { t.DepartmentId, t.Name })
-            .IsUnique();
-
-        builder.HasIndex(t => t.FullName)
             .IsUnique();
 
         builder.HasOne(t => t.Department)
