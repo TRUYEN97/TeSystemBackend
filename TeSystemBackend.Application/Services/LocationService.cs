@@ -18,7 +18,6 @@ public class LocationService : ILocationService
 
     public async Task<LocationDto> CreateAsync(CreateLocationDto request)
     {
-        // Validate parent location if provided
         if (request.ParentId.HasValue)
         {
             var parent = await _locationRepository.GetByIdAsync(request.ParentId.Value);
@@ -27,9 +26,8 @@ public class LocationService : ILocationService
                 throw new KeyNotFoundException(ErrorMessages.LocationNotFound);
             }
         }
-
-        // Check for duplicate name (optional, depending on business rules)
-        var existing = await _locationRepository.GetByNameAsync(request.Name);
+        
+        var existing = await _locationRepository.GetByNameAndParentIdAsync(request.Name, request.ParentId);
         if (existing != null)
         {
             throw new InvalidOperationException(ErrorMessages.LocationNameAlreadyExists);

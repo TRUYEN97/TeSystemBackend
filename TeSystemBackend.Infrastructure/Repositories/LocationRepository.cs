@@ -51,4 +51,9 @@ public class LocationRepository : ILocationRepository
         _context.Locations.Remove(location);
         return Task.CompletedTask;
     }
+
+    public async Task<Location?> GetByNameAndParentIdAsync(string name, int? parentId)
+    {
+        return await _context.Locations.FirstOrDefaultAsync(l => l.Name == name && l.ParentId == parentId);
+    }
 }

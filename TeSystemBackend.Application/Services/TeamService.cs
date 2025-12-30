@@ -78,6 +78,7 @@ public class TeamService : ITeamService
             throw new KeyNotFoundException(ErrorMessages.DepartmentNotFound);
         }
 
+        request.Name = request.Name.ToUpper();
         var existing = await _teamRepository.GetByNameAndDepartmentId(request.DepartmentId, request.Name);
         if (existing != null)
         {
